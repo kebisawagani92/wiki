@@ -1,0 +1,1885 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiki</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-w: 260px;
+  --accent: #6366f1;
+  --accent2: #8b5cf6;
+  --bg: #0f1117;
+  --sidebar-bg: #13151f;
+  --surface: #1c1e2e;
+  --surface2: #242638;
+  --border: rgba(255,255,255,0.07);
+  --text: #e2e4f0;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+  --editor-bg: #16182a;
+  --fs: 16px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+}
+
+.sidebar-header {
+  padding: 20px 16px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.wiki-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
+  color: #fff;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  font-size: 15px;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+  flex-shrink: 0;
+}
+
+.new-page-btn {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s;
+}
+
+.new-page-btn:hover {
+  background: var(--surface);
+  color: #fff;
+  border-color: rgba(99,102,241,0.4);
+}
+
+.new-page-btn .plus {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: rgba(99,102,241,0.2);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+.search-bar {
+  position: relative;
+  padding: 10px 24px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.search-wrap {
+  position: relative;
+  max-width: 480px;
+}
+
+.search-results-pop {
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 24px;
+  right: 24px;
+  max-width: 480px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  padding: 6px;
+  z-index: 50;
+  display: none;
+}
+
+.search-results-pop.open { display: block; }
+
+.search-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 28px 7px 30px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus { border-color: var(--accent); }
+
+.search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.search-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text-dim);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.search-clear:hover { background: var(--accent); color: #fff; }
+.search-wrap.has-value .search-clear { display: flex; }
+
+.search-result {
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  margin: 2px 0;
+  transition: background 0.15s;
+}
+
+.search-result:hover { background: var(--surface); }
+
+.search-result-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-snippet {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.search-result mark {
+  background: rgba(99,102,241,0.35);
+  color: #fff;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.search-empty {
+  padding: 20px 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 12px 16px 6px;
+}
+
+.page-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px 16px;
+}
+
+.page-tree::-webkit-scrollbar { width: 4px; }
+.page-tree::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+.page-tree::-webkit-scrollbar-track { background: transparent; }
+
+.page-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  transition: all 0.15s;
+  position: relative;
+  user-select: none;
+}
+
+.page-item:hover { background: var(--surface); color: var(--text); }
+.page-item.active { background: rgba(99,102,241,0.15); color: #fff; }
+.page-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+/* ── DRAG AND DROP ── */
+.page-item[draggable="true"] { cursor: grab; }
+.page-item.dragging { opacity: 0.35; }
+.page-item.drag-over-before { box-shadow: inset 0 2px 0 0 var(--accent); }
+.page-item.drag-over-into { background: rgba(99,102,241,0.2) !important; outline: 1px solid rgba(99,102,241,0.4); border-radius: 7px; }
+.page-item.drag-over-after { box-shadow: inset 0 -2px 0 0 var(--accent); }
+
+.page-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page-add {
+  opacity: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.page-item:hover .page-add { opacity: 1; }
+.page-add:hover { background: rgba(99,102,241,0.25); color: var(--accent); }
+
+.page-menu-btn {
+  opacity: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.page-item:hover .page-menu-btn { opacity: 1; }
+.page-menu-btn:hover { background: rgba(99,102,241,0.25); color: var(--accent); }
+
+.page-dropdown {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 4px;
+  z-index: 500;
+  min-width: 130px;
+  display: none;
+}
+.page-dropdown.open { display: block; }
+.page-dd-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.page-dd-item:hover { background: var(--surface2); color: var(--text); }
+.page-dd-item.danger { color: #ef4444; }
+.page-dd-item.danger:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+.page-name[contenteditable="true"] {
+  outline: none;
+  background: var(--surface2);
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: #fff;
+}
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--editor-bg);
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 24px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.toolbar::-webkit-scrollbar { display: none; }
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+  border-right: 1px solid var(--border);
+}
+.tool-group:last-of-type { border-right: none; }
+
+.tb-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.tb-btn:hover { background: var(--surface2); color: var(--text); transform: none; }
+.tb-btn.active { background: rgba(99,102,241,0.2); color: var(--accent); }
+
+.tb-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.tb-select:focus { border-color: var(--accent); }
+
+.color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.color-dot:hover { transform: scale(1.25); }
+
+.status-pill {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface2);
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.3s;
+}
+
+.status-pill.saved { color: #34d399; }
+
+/* ── EDITOR AREA ── */
+.editor-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 40px;
+}
+
+.editor-area::-webkit-scrollbar { width: 6px; }
+.editor-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+.editor-area::-webkit-scrollbar-track { background: transparent; }
+
+.page-title-wrap {
+  padding: 40px 0 8px;
+}
+
+#pageTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.03em;
+  outline: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  font-family: inherit;
+  line-height: 1.2;
+}
+
+#pageTitle::placeholder { color: rgba(255,255,255,0.15); }
+
+.title-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 24px;
+}
+
+.editor {
+  min-height: 60vh;
+  outline: none;
+  font-size: var(--fs);
+  line-height: 1.75;
+  color: #d1d5e8;
+  padding-bottom: 80px;
+  caret-color: var(--accent);
+}
+
+.editor:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(255,255,255,0.15);
+  pointer-events: none;
+}
+
+.editor b, .editor strong { color: #fff; }
+
+.editor ul, .editor ol { padding-left: 1.8em; margin: 0.3em 0; }
+.editor ul ul, .editor ol ol, .editor ul ol, .editor ol ul { margin: 0.1em 0; }
+.editor ul { list-style: disc; }
+.editor ul ul { list-style: '-  '; }
+.editor ul ul ul { list-style: disc; }
+.editor ul ul ul ul { list-style: '-  '; }
+.editor ol { list-style: decimal; }
+.editor ol ol { list-style: lower-alpha; }
+.editor ol ol ol { list-style: lower-roman; }
+.editor li { margin: 0.15em 0; }
+.editor li::marker { color: var(--accent); }
+
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  width: 340px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  transform: scale(0.96) translateY(8px);
+  transition: transform 0.2s;
+}
+
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal h3 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 16px; }
+
+.modal-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 12px;
+  font-family: inherit;
+}
+
+.modal-input:focus { border-color: var(--accent); }
+.modal-input::placeholder { color: var(--text-muted); }
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.modal-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: none;
+  transform: none;
+}
+
+.modal-btn:hover { transform: none; }
+
+.modal-btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+}
+
+.modal-btn.primary:hover { opacity: 0.9; }
+
+.modal-btn.ghost {
+  background: var(--surface2);
+  color: var(--text-dim);
+}
+
+.modal-btn.ghost:hover { background: var(--border); color: var(--text); }
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.confirm-overlay.open { opacity: 1; pointer-events: all; }
+
+.confirm-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  width: 300px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  transform: scale(0.96);
+  transition: transform 0.2s;
+  text-align: center;
+}
+
+.confirm-overlay.open .confirm-box { transform: scale(1); }
+
+.confirm-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin: 0 auto 12px;
+}
+
+.confirm-box h3 { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+.confirm-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
+
+.confirm-actions { display: flex; gap: 8px; }
+
+.confirm-btn {
+  flex: 1;
+  padding: 9px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: none;
+  transform: none;
+}
+
+.confirm-btn:hover { transform: none; }
+.confirm-btn.cancel { background: var(--surface2); color: var(--text-dim); }
+.confirm-btn.danger { background: #ef4444; color: #fff; }
+.confirm-btn.danger:hover { background: #dc2626; }
+
+/* ── TRASH ── */
+.sidebar-trash { padding: 6px 8px 10px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.trash-sidebar-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.trash-sidebar-btn:hover { background: var(--surface); color: var(--text-dim); }
+.trash-badge {
+  margin-left: auto;
+  background: rgba(239,68,68,0.2);
+  color: #ef4444;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 6px;
+  display: none;
+}
+.trash-badge.visible { display: inline-flex; }
+
+.trash-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.trash-overlay.open { opacity: 1; pointer-events: all; }
+.trash-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 440px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  transform: scale(0.96) translateY(8px);
+  transition: transform 0.2s;
+}
+.trash-overlay.open .trash-modal { transform: scale(1) translateY(0); }
+.trash-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.trash-modal-header h3 { font-size: 16px; font-weight: 600; color: #fff; }
+.trash-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  transition: all 0.15s;
+}
+.trash-modal-close:hover { background: var(--surface2); color: var(--text); }
+.trash-list { flex: 1; overflow-y: auto; padding: 8px; }
+.trash-list::-webkit-scrollbar { width: 4px; }
+.trash-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+.trash-empty-msg { text-align: center; padding: 40px 20px; font-size: 13px; color: var(--text-muted); }
+.trash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.trash-item:hover { background: var(--surface2); }
+.trash-item-info { flex: 1; min-width: 0; }
+.trash-item-name { font-size: 13.5px; color: var(--text); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trash-item-meta { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+.trash-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.trash-restore-btn {
+  background: rgba(99,102,241,0.15);
+  color: var(--accent);
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.trash-restore-btn:hover { background: rgba(99,102,241,0.3); }
+.trash-del-btn {
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.trash-del-btn:hover { background: rgba(239,68,68,0.25); }
+.trash-modal-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.trash-empty-all-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.trash-empty-all-btn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="wiki-logo">
+      <span class="logo-icon">✦</span>
+      Wiki
+    </div>
+    <button class="new-page-btn" onclick="quickCreate()">
+      <span class="plus">+</span>
+      新規ページ
+    </button>
+  </div>
+  <div class="sidebar-section-label" id="treeLabel">ページ</div>
+  <div class="page-tree" id="pageTree"></div>
+  <div class="sidebar-trash">
+    <button class="trash-sidebar-btn" onclick="openTrash()">
+      🗑 ごみ箱
+      <span class="trash-badge" id="trashBadge"></span>
+    </button>
+    <button class="trash-sidebar-btn" id="syncSettingsBtn" onclick="openSyncSettings()" title="GitHub同期の設定（トークン・リポジトリ）">
+      ⚙ 同期設定
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SEARCH BAR -->
+  <div class="search-bar">
+    <div class="search-wrap" id="searchWrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="ページを検索 (Ctrl+K)" autocomplete="off">
+      <span class="search-clear" onclick="clearSearch()" title="クリア">✕</span>
+    </div>
+    <div class="search-results-pop" id="searchResultsPop"></div>
+  </div>
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="tool-group">
+      <select class="tb-select" id="fontSizeSelect" title="文字サイズ">
+        <option value="13">13px</option>
+        <option value="14">14px</option>
+        <option value="15">15px</option>
+        <option value="16" selected>16px</option>
+        <option value="18">18px</option>
+        <option value="20">20px</option>
+        <option value="24">24px</option>
+        <option value="28">28px</option>
+        <option value="32">32px</option>
+      </select>
+    </div>
+
+    <div class="tool-group">
+      <button class="tb-btn" onclick="fmt('bold')" title="太字 (Ctrl+B)"><b>B</b></button>
+      <button class="tb-btn" onclick="fmt('italic')" title="斜体 (Ctrl+I)"><i>I</i></button>
+      <button class="tb-btn" onclick="fmt('underline')" title="下線 (Ctrl+U)"><u>U</u></button>
+      <button class="tb-btn" onclick="fmt('strikeThrough')" title="取り消し線"><s>S</s></button>
+    </div>
+
+    <div class="tool-group">
+      <button class="tb-btn" onclick="fmt('insertUnorderedList')" title="箇条書き">≡</button>
+      <button class="tb-btn" onclick="fmt('insertOrderedList')" title="番号付きリスト">1.</button>
+    </div>
+
+    <div class="tool-group">
+      <select class="tb-select" id="colorSelect" title="文字色">
+        <option value="" selected disabled>文字色</option>
+        <option value="#f87171" style="color:#f87171">■ 赤</option>
+        <option value="#60a5fa" style="color:#60a5fa">■ 青</option>
+        <option value="#fbbf24" style="color:#fbbf24">■ 黄</option>
+        <option value="#34d399" style="color:#34d399">■ 緑</option>
+        <option value="#c084fc" style="color:#c084fc">■ 紫</option>
+        <option value="#e2e4f0" style="color:#e2e4f0">■ 白</option>
+      </select>
+    </div>
+
+    <div class="tool-group">
+      <button class="tb-btn" onclick="fmt('removeFormat')" title="書式クリア">✕</button>
+    </div>
+
+    <span class="status-pill" id="saveStatus">自動保存 ON</span>
+    <span class="status-pill" id="syncStatus" onclick="openSyncSettings()" title="GitHub同期の状態。クリックで設定" style="cursor:pointer;">⚙ 同期未設定</span>
+  </div>
+
+  <!-- EDITOR AREA -->
+  <div class="editor-area">
+    <div class="page-title-wrap">
+      <input id="pageTitle" type="text" placeholder="ページタイトル" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="title-divider"></div>
+    <div
+      id="editor"
+      class="editor"
+      contenteditable="true"
+      data-placeholder="ここから入力..."
+    ></div>
+  </div>
+</div>
+
+<!-- TRASH MODAL -->
+<div class="trash-overlay" id="trashOverlay">
+  <div class="trash-modal">
+    <div class="trash-modal-header">
+      <h3>🗑 ごみ箱</h3>
+      <button class="trash-modal-close" onclick="closeTrash()">✕</button>
+    </div>
+    <div class="trash-list" id="trashList"></div>
+    <div class="trash-modal-footer">
+      <button class="trash-empty-all-btn" onclick="emptyTrash()">すべて完全削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE DROPDOWN MENU -->
+<div class="page-dropdown" id="pageDropdown">
+  <div class="page-dd-item danger" id="ddDeleteBtn">🗑 削除</div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑</div>
+    <h3>ページを削除</h3>
+    <p id="confirmMsg">このページを削除しますか？</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn cancel" onclick="closeConfirm(false)">キャンセル</button>
+      <button class="confirm-btn danger" onclick="closeConfirm(true)">削除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+let pages = JSON.parse(localStorage.getItem('wikiPages') || 'null') || {
+  'トップページ': { content: '', children: [] }
+};
+// ルートページ名。表示名で「ルートか否か」を判定せず、この変数で追跡(リネーム可能にするため)。
+let rootName = localStorage.getItem('wikiRoot') || 'トップページ';
+// Defensive: ensure every page has required fields
+if (!pages[rootName]) pages[rootName] = { content: '', children: [] };
+Object.keys(pages).forEach(k => {
+  if (typeof pages[k].content !== 'string') pages[k].content = '';
+  if (!Array.isArray(pages[k].children)) pages[k].children = [];
+});
+let currentPage = rootName;
+let editorLoaded = false; // エディタに currentPage の内容を読み込み済みか。未読み込み時の空上書き保存を防ぐ
+let saveTimer = null;
+let confirmResolve = null;
+let draggedPage = null;
+let savedEditorRange = null;
+let trash = JSON.parse(localStorage.getItem('wikiTrash') || '[]');
+
+const savedFs = localStorage.getItem('wikiFontSize') || '16';
+document.documentElement.style.setProperty('--fs', savedFs + 'px');
+
+// ── RENDER TREE ────────────────────────────────────────
+function renderTree() {
+  const tree = document.getElementById('pageTree');
+  tree.innerHTML = '';
+
+  function node(name, depth) {
+    const wrap = document.createElement('div');
+    wrap.className = 'page-item' + (name === currentPage ? ' active' : '');
+    wrap.style.paddingLeft = (10 + depth * 14) + 'px';
+
+    const label = document.createElement('span');
+    label.className = 'page-name';
+    label.textContent = name;
+
+    label.onclick = (e) => { e.stopPropagation(); openPage(name); };
+
+    label.ondblclick = (e) => {
+      e.stopPropagation();
+      label.contentEditable = true;
+      label.focus();
+      const r = document.createRange();
+      r.selectNodeContents(label);
+      const s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+
+      const finish = () => {
+        label.contentEditable = false;
+        const nName = label.textContent.trim();
+        if (!nName || nName === name || pages[nName]) { renderTree(); return; }
+        pages[nName] = pages[name];
+        delete pages[nName].untitled; // 正式名が付いたので未命名フラグを解除
+        delete pages[name];
+        Object.keys(pages).forEach(p => {
+          pages[p].children = pages[p].children.map(c => c === name ? nName : c);
+        });
+        if (currentPage === name) currentPage = nName;
+        if (rootName === name) { rootName = nName; localStorage.setItem('wikiRoot', rootName); } // ルートをリネームしたら追跡名も更新
+        persist();
+        renderTree();
+        if (currentPage === nName) document.getElementById('pageTitle').value = nName;
+      };
+      label.onblur = finish;
+      label.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); finish(); } };
+    };
+
+    const menuBtn = document.createElement('span');
+    menuBtn.className = 'page-menu-btn';
+    menuBtn.textContent = '⋮';
+    menuBtn.title = 'メニュー';
+    if (name === rootName) menuBtn.style.visibility = 'hidden'; // ルートは削除不可なのでメニュー非表示
+    menuBtn.onclick = (e) => { e.stopPropagation(); openPageMenu(name, e); };
+
+    const addBtn = document.createElement('span');
+    addBtn.className = 'page-add';
+    addBtn.textContent = '+';
+    addBtn.title = '子ページを追加';
+    addBtn.onclick = (e) => { e.stopPropagation(); quickCreate(name); };
+
+    wrap.appendChild(label);
+    wrap.appendChild(menuBtn);
+    wrap.appendChild(addBtn);
+
+    if (name !== rootName) {
+      wrap.draggable = true;
+      wrap.addEventListener('dragstart', (e) => {
+        draggedPage = name;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => wrap.classList.add('dragging'), 0);
+      });
+      wrap.addEventListener('dragend', () => {
+        wrap.classList.remove('dragging');
+        clearDropIndicators();
+        draggedPage = null;
+      });
+    }
+    wrap.addEventListener('dragover', (e) => {
+      if (!draggedPage || draggedPage === name || isAncestorOf(draggedPage, name)) return;
+      e.preventDefault();
+      clearDropIndicators();
+      const rect = wrap.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const h = rect.height;
+      if (name === rootName || (y >= h * 0.3 && y <= h * 0.7)) {
+        wrap.classList.add('drag-over-into');
+      } else if (y < h * 0.3) {
+        wrap.classList.add('drag-over-before');
+      } else {
+        wrap.classList.add('drag-over-after');
+      }
+    });
+    wrap.addEventListener('dragleave', (e) => {
+      if (!wrap.contains(e.relatedTarget)) {
+        wrap.classList.remove('drag-over-before', 'drag-over-into', 'drag-over-after');
+      }
+    });
+    wrap.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (!draggedPage || draggedPage === name) return;
+      const rect = wrap.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const h = rect.height;
+      let position;
+      if (name === rootName || (y >= h * 0.3 && y <= h * 0.7)) {
+        position = 'into';
+      } else if (y < h * 0.3) {
+        position = 'before';
+      } else {
+        position = 'after';
+      }
+      wrap.classList.remove('drag-over-before', 'drag-over-into', 'drag-over-after');
+      movePage(draggedPage, name, position);
+    });
+
+    tree.appendChild(wrap);
+    (pages[name].children || []).forEach(c => node(c, depth + 1));
+  }
+
+  if (!pages[rootName]) {
+    pages[rootName] = { content: '', children: [] };
+    Object.keys(pages).forEach(k => {
+      if (k !== rootName && !Object.values(pages).some(p => (p.children || []).includes(k))) {
+        pages[rootName].children.push(k);
+      }
+    });
+    persist();
+  }
+  node(rootName, 0);
+}
+
+// ── DRAG AND DROP HELPERS ──────────────────────────────
+function clearDropIndicators() {
+  document.querySelectorAll('.page-item').forEach(el => {
+    el.classList.remove('drag-over-before', 'drag-over-into', 'drag-over-after');
+  });
+}
+
+function findParent(name) {
+  return Object.keys(pages).find(p => (pages[p].children || []).includes(name));
+}
+
+function isAncestorOf(ancestor, name) {
+  if (ancestor === name) return true;
+  return (pages[ancestor]?.children || []).some(c => isAncestorOf(c, name));
+}
+
+function movePage(dragged, target, position) {
+  if (dragged === target || isAncestorOf(dragged, target)) return;
+  const oldParent = findParent(dragged);
+  if (!oldParent) return;
+  pages[oldParent].children = pages[oldParent].children.filter(c => c !== dragged);
+
+  if (position === 'into') {
+    pages[target].children.push(dragged);
+  } else {
+    const targetParent = findParent(target);
+    if (!targetParent) { pages[oldParent].children.push(dragged); return; }
+    const siblings = pages[targetParent].children;
+    const idx = siblings.indexOf(target);
+    if (idx === -1) { pages[oldParent].children.push(dragged); return; }
+    siblings.splice(position === 'before' ? idx : idx + 1, 0, dragged);
+  }
+  persist();
+  renderTree();
+}
+
+// ── TRASH ─────────────────────────────────────────────
+function persistTrash() {
+  localStorage.setItem('wikiTrash', JSON.stringify(trash));
+}
+
+function updateTrashCount() {
+  const badge = document.getElementById('trashBadge');
+  if (!badge) return;
+  if (trash.length > 0) {
+    badge.textContent = trash.length;
+    badge.classList.add('visible');
+  } else {
+    badge.textContent = '';
+    badge.classList.remove('visible');
+  }
+}
+
+function openTrash() {
+  renderTrashList();
+  document.getElementById('trashOverlay').classList.add('open');
+}
+
+function closeTrash() {
+  document.getElementById('trashOverlay').classList.remove('open');
+}
+
+function renderTrashList() {
+  const list = document.getElementById('trashList');
+  list.innerHTML = '';
+  if (trash.length === 0) {
+    list.innerHTML = '<div class="trash-empty-msg">ごみ箱は空です</div>';
+    return;
+  }
+  trash.forEach((item, idx) => {
+    const date = new Date(item.deletedAt).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const count = Object.keys(item.subtree).length;
+    const row = document.createElement('div');
+    row.className = 'trash-item';
+    row.innerHTML = `
+      <div class="trash-item-info">
+        <span class="trash-item-name">📄 ${escapeHtml(item.root)}</span>
+        <span class="trash-item-meta">${count > 1 ? count + 'ページ含む · ' : ''}${date}</span>
+      </div>
+      <div class="trash-item-actions">
+        <button class="trash-restore-btn" data-idx="${idx}">復元</button>
+        <button class="trash-del-btn" data-idx="${idx}">完全削除</button>
+      </div>`;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.trash-restore-btn').forEach(btn => {
+    btn.onclick = () => restorePage(+btn.dataset.idx);
+  });
+  list.querySelectorAll('.trash-del-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const ok = await showConfirm(`「${trash[+btn.dataset.idx].root}」を完全に削除しますか？`);
+      if (ok) permanentDelete(+btn.dataset.idx);
+    };
+  });
+}
+
+function restorePage(idx) {
+  const item = trash[idx];
+  Object.assign(pages, item.subtree);
+  const parent = pages[item.parent] ? item.parent : rootName;
+  if (!pages[parent].children.includes(item.root)) {
+    pages[parent].children.push(item.root);
+  }
+  trash.splice(idx, 1);
+  persistTrash();
+  persist();
+  updateTrashCount();
+  renderTree();
+  renderTrashList();
+}
+
+function permanentDelete(idx) {
+  trash.splice(idx, 1);
+  persistTrash();
+  updateTrashCount();
+  renderTrashList();
+}
+
+async function emptyTrash() {
+  if (trash.length === 0) return;
+  const ok = await showConfirm(`ごみ箱内の ${trash.length} 件をすべて完全削除しますか？`);
+  if (!ok) return;
+  trash = [];
+  persistTrash();
+  updateTrashCount();
+  renderTrashList();
+}
+
+// ── PAGE MENU DROPDOWN ────────────────────────────────
+let ddTargetPage = null;
+
+function openPageMenu(name, e) {
+  ddTargetPage = name;
+  const dd = document.getElementById('pageDropdown');
+  const rect = e.target.getBoundingClientRect();
+  let top = rect.bottom + 4;
+  let left = rect.left;
+  if (left + 140 > window.innerWidth) left = window.innerWidth - 144;
+  dd.style.top = top + 'px';
+  dd.style.left = left + 'px';
+  dd.classList.add('open');
+}
+
+function closePageMenu() {
+  document.getElementById('pageDropdown').classList.remove('open');
+  ddTargetPage = null;
+}
+
+// ── SEARCH ────────────────────────────────────────────
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function stripHtml(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return d.textContent || '';
+}
+
+function renderSearch(query) {
+  const pop = document.getElementById('searchResultsPop');
+  pop.innerHTML = '';
+  const q = query.trim().toLowerCase();
+  if (!q) {
+    pop.classList.remove('open');
+    return;
+  }
+  const re = new RegExp(escapeRegExp(query.trim()), 'gi');
+  const results = [];
+  Object.keys(pages).forEach(name => {
+    const text = stripHtml(pages[name].content || '');
+    const titleHit = name.toLowerCase().includes(q);
+    const idx = text.toLowerCase().indexOf(q);
+    if (titleHit || idx >= 0) {
+      let snippet = '';
+      if (idx >= 0) {
+        const start = Math.max(0, idx - 20);
+        const end = Math.min(text.length, idx + query.length + 40);
+        snippet = (start > 0 ? '…' : '') + text.substring(start, end) + (end < text.length ? '…' : '');
+      } else {
+        snippet = text.substring(0, 60);
+      }
+      results.push({ name, snippet });
+    }
+  });
+  pop.classList.add('open');
+  if (results.length === 0) {
+    pop.innerHTML = '<div class="search-empty">該当ページなし</div>';
+    return;
+  }
+  results.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'search-result';
+    const titleHtml = escapeHtml(r.name).replace(re, m => `<mark>${escapeHtml(m)}</mark>`);
+    const snipHtml = escapeHtml(r.snippet).replace(re, m => `<mark>${escapeHtml(m)}</mark>`);
+    item.innerHTML = `<div class="search-result-title">${titleHtml}</div><div class="search-result-snippet">${snipHtml || '本文なし'}</div>`;
+    item.onclick = () => {
+      openPage(r.name);
+      clearSearch();
+    };
+    pop.appendChild(item);
+  });
+}
+
+function clearSearch() {
+  const inp = document.getElementById('searchInput');
+  inp.value = '';
+  document.getElementById('searchWrap').classList.remove('has-value');
+  document.getElementById('searchResultsPop').classList.remove('open');
+}
+
+// ── OPEN PAGE ─────────────────────────────────────────
+function openPage(name) {
+  if (editorLoaded) saveCurrent(); // 初回はエディタが空のため、保存済み内容を空で上書きしないようスキップ
+  currentPage = name;
+  document.getElementById('pageTitle').value = pages[name].untitled ? '' : name; // 未命名ページは空表示(プレースホルダー)
+  document.getElementById('editor').innerHTML = pages[name].content || '';
+  editorLoaded = true;
+  renderTree();
+}
+
+// ── SAVE ──────────────────────────────────────────────
+function saveCurrent() {
+  if (!pages[currentPage]) return;
+  pages[currentPage].content = document.getElementById('editor').innerHTML;
+  persist();
+}
+
+function persist() {
+  localStorage.setItem('wikiPages', JSON.stringify(pages));
+  localStorage.setItem('wikiRoot', rootName);
+  if (typeof ghSchedulePush === 'function') ghSchedulePush();
+}
+
+// ── 外出先閲覧用エクスポート ────────────────────────────
+// 全ページ内容(pages + rootName)をJSONでクリップボードにコピーする。
+// Claudeがこれを受け取りConfluenceページへ反映 → 他PCのブラウザから閲覧可能にする。
+function exportForConfluence() {
+  if (editorLoaded) saveCurrent(); // 編集中の内容を確実に反映
+  const payload = JSON.stringify({
+    type: 'wiki_auto_save_export',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    rootName: rootName,
+    pages: pages
+  });
+  const btn = document.getElementById('exportBtn');
+  const done = (ok) => {
+    if (!btn) return;
+    const orig = '📤 公開用コピー';
+    btn.textContent = ok ? '✓ コピーしました' : '✕ コピー失敗';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  };
+  navigator.clipboard.writeText(payload).then(() => done(true)).catch(() => {
+    // フォールバック: 旧execCommand方式
+    const ta = document.createElement('textarea');
+    ta.value = payload;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    done(ok);
+  });
+}
+
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  const status = document.getElementById('saveStatus');
+  status.textContent = '保存中…';
+  status.className = 'status-pill';
+  saveTimer = setTimeout(() => {
+    saveCurrent();
+    const t = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    status.textContent = `保存済み ${t}`;
+    status.className = 'status-pill saved';
+  }, 600);
+}
+
+// ── CREATE PAGE ────────────────────────────────────────
+function quickCreate(parentName) {
+  const parent = (parentName && pages[parentName]) ? parentName : (currentPage || rootName);
+  const base = '新規ページ';
+  let name = base;
+  let i = 2;
+  while (pages[name]) { name = `${base} ${i++}`; }
+  pages[name] = { content: '', children: [], untitled: true }; // 未命名フラグ。タイトル入力までタイトル欄は空表示
+  pages[parent].children.push(name);
+  persist();
+  renderTree();
+  openPage(name);
+  setTimeout(() => {
+    document.getElementById('pageTitle').focus(); // タイトル欄は openPage で空表示済み。フォーカスのみ
+  }, 30);
+}
+
+// ── DELETE PAGE (→ TRASH) ─────────────────────────────
+function deletePage(name) {
+  const subtree = {};
+  const capture = (n) => {
+    subtree[n] = { content: pages[n].content, children: [...(pages[n].children || [])] };
+    (pages[n].children || []).forEach(capture);
+  };
+  capture(name);
+
+  const parent = findParent(name) || rootName;
+  trash.push({ root: name, subtree, parent, deletedAt: Date.now() });
+  persistTrash();
+
+  Object.keys(pages).forEach(p => {
+    pages[p].children = pages[p].children.filter(c => c !== name);
+  });
+  Object.keys(subtree).forEach(k => delete pages[k]);
+
+  // 削除でcurrentPageが消える場合、ルートへ付け替える。このときエディタにはまだ
+  // 削除ページの内容が残っており currentPage(=root) とズレるため、editorLoaded=false にして
+  // 直後の openPage(rootName) 冒頭の saveCurrent() による空上書き(ルート本文消失)を防ぐ。
+  if (subtree[currentPage]) { currentPage = rootName; editorLoaded = false; }
+  persist();
+  updateTrashCount();
+  renderTree();
+  if (currentPage === rootName) openPage(rootName);
+}
+
+// ── CONFIRM DIALOG ─────────────────────────────────────
+function showConfirm(msg) {
+  return new Promise(resolve => {
+    confirmResolve = resolve;
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmOverlay').classList.add('open');
+  });
+}
+
+function closeConfirm(result) {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  if (confirmResolve) { confirmResolve(result); confirmResolve = null; }
+}
+
+// ── FORMATTING ────────────────────────────────────────
+function fmt(cmd, val = null) {
+  const editor = document.getElementById('editor');
+  if (document.activeElement !== editor && savedEditorRange) {
+    editor.focus();
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedEditorRange);
+  }
+  document.execCommand(cmd, false, val);
+  scheduleSave();
+}
+
+function setColor(c) { fmt('foreColor', c); }
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────
+document.getElementById('editor').addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'b') { e.preventDefault(); fmt('bold'); }
+    if (e.key === 'i') { e.preventDefault(); fmt('italic'); }
+    if (e.key === 'u') { e.preventDefault(); fmt('underline'); }
+    return;
+  }
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const editor = document.getElementById('editor');
+    let node = sel.anchorNode;
+    if (node && node.nodeType === 3) node = node.parentElement;
+    const inList = node && node.closest && node.closest('li');
+
+    if (inList) {
+      document.execCommand(e.shiftKey ? 'outdent' : 'indent', false, null);
+    } else {
+      let block = node;
+      while (block && block !== editor && !/^(P|DIV|H1|H2|H3|H4|H5|H6|BLOCKQUOTE)$/.test(block.tagName)) {
+        block = block.parentElement;
+      }
+      if (!block || block === editor) {
+        document.execCommand('formatBlock', false, 'div');
+        let n = window.getSelection().anchorNode;
+        if (n && n.nodeType === 3) n = n.parentElement;
+        block = n;
+        while (block && block !== editor && !/^(P|DIV|H1|H2|H3|H4|H5|H6|BLOCKQUOTE)$/.test(block.tagName)) {
+          block = block.parentElement;
+        }
+      }
+      if (block && block !== editor) {
+        const cur = parseInt(block.style.marginLeft) || 0;
+        const next = e.shiftKey ? Math.max(0, cur - 32) : cur + 32;
+        block.style.marginLeft = next ? next + 'px' : '';
+      }
+    }
+    scheduleSave();
+  }
+});
+
+document.getElementById('editor').addEventListener('input', scheduleSave);
+document.getElementById('editor').addEventListener('blur', () => {
+  const sel = window.getSelection();
+  savedEditorRange = sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null;
+});
+
+document.getElementById('editor').addEventListener('paste', (e) => {
+  e.preventDefault();
+  const html = e.clipboardData.getData('text/html');
+  const text = e.clipboardData.getData('text/plain');
+
+  let cleaned;
+  if (html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    tmp.querySelectorAll('style, meta, link, script, head').forEach(el => el.remove());
+    tmp.querySelectorAll('*').forEach(el => {
+      el.removeAttribute('class');
+      el.removeAttribute('id');
+      el.removeAttribute('lang');
+      if (el.tagName === 'FONT') {
+        el.removeAttribute('size');
+        el.removeAttribute('face');
+      }
+      const fw = el.style.fontWeight;
+      const fi = el.style.fontStyle;
+      const td = el.style.textDecoration;
+      el.removeAttribute('style');
+      if (fw && fw !== 'normal') el.style.fontWeight = fw;
+      if (fi && fi !== 'normal') el.style.fontStyle = fi;
+      if (td && td !== 'none') el.style.textDecoration = td;
+    });
+    cleaned = tmp.innerHTML;
+  } else {
+    cleaned = escapeHtml(text).replace(/\n/g, '<br>');
+  }
+
+  document.execCommand('insertHTML', false, cleaned);
+  scheduleSave();
+});
+
+document.getElementById('pageTitle').addEventListener('change', (e) => {
+  const newName = e.target.value.trim();
+  if (!newName || newName === currentPage || pages[newName]) {
+    // 未命名ページは空(プレースホルダー)に戻す。命名済みは元の名前を表示
+    e.target.value = pages[currentPage].untitled ? '' : currentPage;
+    return;
+  }
+  const wasRoot = currentPage === rootName;
+  pages[newName] = pages[currentPage];
+  delete pages[newName].untitled; // 正式名が付いたので未命名フラグを解除
+  delete pages[currentPage];
+  Object.keys(pages).forEach(p => {
+    pages[p].children = pages[p].children.map(c => c === currentPage ? newName : c);
+  });
+  currentPage = newName;
+  if (wasRoot) { rootName = newName; localStorage.setItem('wikiRoot', rootName); } // ルートをリネームしたら追跡名も更新
+  persist();
+  renderTree();
+});
+
+// ── TOOLBAR FOCUS PRESERVATION ────────────────────────
+document.querySelector('.toolbar').addEventListener('mousedown', (e) => {
+  if (e.target.closest('.tb-btn, .color-dot')) {
+    e.preventDefault();
+  }
+});
+
+// ── FONT SIZE ─────────────────────────────────────────
+const fsSel = document.getElementById('fontSizeSelect');
+fsSel.value = savedFs;
+fsSel.addEventListener('change', function() {
+  document.documentElement.style.setProperty('--fs', this.value + 'px');
+  localStorage.setItem('wikiFontSize', this.value);
+});
+
+// ── TEXT COLOR ────────────────────────────────────────
+const colorSel = document.getElementById('colorSelect');
+colorSel.addEventListener('change', function() {
+  if (this.value) setColor(this.value);
+  this.selectedIndex = 0; // プレースホルダーに戻し、同色の再選択を可能に
+});
+
+// ── SEARCH WIRING ─────────────────────────────────────
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', (e) => {
+  const v = e.target.value;
+  document.getElementById('searchWrap').classList.toggle('has-value', v.length > 0);
+  renderSearch(v);
+});
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { e.preventDefault(); clearSearch(); searchInput.blur(); }
+});
+searchInput.addEventListener('focus', () => {
+  if (searchInput.value.trim()) renderSearch(searchInput.value);
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-bar')) {
+    document.getElementById('searchResultsPop').classList.remove('open');
+  }
+});
+
+// ── GLOBAL KEYBOARD ───────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeConfirm(false); closeTrash(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+    e.preventDefault();
+    quickCreate();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    searchInput.focus();
+    searchInput.select();
+  }
+});
+
+// ── INIT ──────────────────────────────────────────────
+document.getElementById('ddDeleteBtn').onclick = () => {
+  const name = ddTargetPage;
+  closePageMenu();
+  if (!name || name === rootName) return;
+  deletePage(name);
+};
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#pageDropdown') && !e.target.closest('.page-menu-btn')) {
+    closePageMenu();
+  }
+});
+
+renderTree();
+openPage(currentPage);
+updateTrashCount();
+window.addEventListener('beforeunload', saveCurrent);
+
+// ════════════════════════════════════════════════════════
+//  GitHub 同期エンジン（非公開リポジトリの data.json を Contents API で読み書き）
+// ════════════════════════════════════════════════════════
+const GH = {
+  cfg: JSON.parse(localStorage.getItem('wikiGhCfg') || 'null') || { owner: '', repo: '', path: 'data.json', branch: 'main' },
+  token: localStorage.getItem('wikiGhToken') || '',
+  sha: null,            // 現在のリモートファイル sha（楽観ロック用）
+  lastSyncedCore: null, // 最後にリモートと一致していた {rootName,pages} の文字列
+  pushTimer: null,
+  pulling: false,
+  pushing: false,
+};
+
+function ghConfigured() { return !!(GH.token && GH.cfg.owner && GH.cfg.repo); }
+function ghHeaders() {
+  return {
+    'Authorization': 'Bearer ' + GH.token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+}
+function ghUrl() {
+  return `https://api.github.com/repos/${GH.cfg.owner}/${GH.cfg.repo}/contents/${GH.cfg.path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+// UTF-8 安全な base64 変換（日本語対応・大きな配列でもスタック溢れしないようチャンク処理）
+function utf8ToB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  return btoa(bin);
+}
+function b64ToUtf8(b64) {
+  const clean = b64.replace(/\s/g, '');
+  const bin = atob(clean);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function coreString() { return JSON.stringify({ rootName, pages }); }
+function dataString() {
+  return JSON.stringify({ type: 'wiki_auto_save', version: 1, rootName, pages, updatedAt: new Date().toISOString() }, null, 2);
+}
+
+function setSync(state, text) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.className = 'status-pill' + (state === 'saved' ? ' saved' : '');
+  el.style.color = state === 'error' ? '#f87171' : (state === 'conflict' ? '#fbbf24' : '');
+  el.textContent = text;
+}
+
+function applyRemote(remote) {
+  pages = remote.pages || {};
+  rootName = remote.rootName || Object.keys(pages)[0] || 'トップページ';
+  if (!pages[rootName]) pages[rootName] = { content: '', children: [] };
+  Object.keys(pages).forEach(k => {
+    if (typeof pages[k].content !== 'string') pages[k].content = '';
+    if (!Array.isArray(pages[k].children)) pages[k].children = [];
+  });
+  if (!pages[currentPage]) currentPage = rootName;
+  localStorage.setItem('wikiPages', JSON.stringify(pages));
+  localStorage.setItem('wikiRoot', rootName);
+  editorLoaded = false; // openPage の冒頭 saveCurrent による空上書きを防ぐ
+  renderTree();
+  openPage(currentPage);
+}
+
+// リモートから取得。other PC の変更を取り込む
+async function ghPull(opts = {}) {
+  if (!ghConfigured() || GH.pulling || GH.pushing) return;
+  GH.pulling = true;
+  setSync('syncing', '↓ 取得中…');
+  try {
+    const res = await fetch(ghUrl() + `?ref=${encodeURIComponent(GH.cfg.branch)}&_=${Date.now()}`, { headers: ghHeaders(), cache: 'no-store' });
+    if (res.status === 404) { // ファイル未作成 → ローカルを初回アップロード
+      GH.sha = null; GH.pulling = false; await ghPush(true); return;
+    }
+    if (res.status === 401) { setSync('error', '⚠ 認証エラー'); GH.pulling = false; return; }
+    if (!res.ok) { setSync('error', '⚠ 取得失敗 ' + res.status); GH.pulling = false; return; }
+    const j = await res.json();
+    GH.sha = j.sha;
+    const remote = JSON.parse(b64ToUtf8(j.content));
+    const remoteCore = JSON.stringify({ rootName: remote.rootName, pages: remote.pages });
+    const localCore = coreString();
+    if (remoteCore === localCore) {
+      GH.lastSyncedCore = remoteCore; markSynced();
+    } else if (localCore === GH.lastSyncedCore || GH.lastSyncedCore === null) {
+      // ローカルは前回同期から未変更 → リモートを採用
+      applyRemote(remote);
+      GH.lastSyncedCore = JSON.stringify({ rootName, pages });
+      markSynced();
+    } else if (remoteCore === GH.lastSyncedCore) {
+      // リモートは未変更・ローカルに編集あり → push に任せる
+      ghPush();
+    } else {
+      // 双方が変化 → 競合
+      const keepLocal = window.confirm(
+        '⚠ 競合: このPCと他端末の両方でWikiが編集されています。\n\n' +
+        '［OK］このPCの内容でサーバーを上書き\n［キャンセル］サーバーの最新を取得（このPCの未同期の変更は失われます）');
+      if (keepLocal) { GH.pulling = false; ghPush(true); return; }
+      else { applyRemote(remote); GH.lastSyncedCore = JSON.stringify({ rootName, pages }); markSynced(); }
+    }
+  } catch (e) {
+    setSync('error', '⚠ オフライン');
+  } finally {
+    GH.pulling = false;
+  }
+}
+
+// リモートへ書き戻し
+async function ghPush(force) {
+  if (!ghConfigured()) return;
+  if (editorLoaded) { if (pages[currentPage]) pages[currentPage].content = document.getElementById('editor').innerHTML; }
+  const core = coreString();
+  if (!force && core === GH.lastSyncedCore) { markSynced(); return; } // 変更なし
+  if (GH.pushing) { ghSchedulePush(); return; }
+  GH.pushing = true;
+  setSync('syncing', '↑ 保存中…');
+  try {
+    const body = {
+      message: 'wiki update ' + new Date().toISOString(),
+      content: utf8ToB64(dataString()),
+      branch: GH.cfg.branch,
+    };
+    if (GH.sha) body.sha = GH.sha;
+    const res = await fetch(ghUrl(), { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (res.status === 409 || res.status === 422) {
+      // sha 競合 → リモートが進んでいる。取得して競合解決
+      GH.pushing = false; await ghPull(); return;
+    }
+    if (res.status === 401) { setSync('error', '⚠ 認証エラー'); GH.pushing = false; return; }
+    if (!res.ok) { setSync('error', '⚠ 保存失敗 ' + res.status); GH.pushing = false; return; }
+    const j = await res.json();
+    GH.sha = j.content && j.content.sha ? j.content.sha : GH.sha;
+    GH.lastSyncedCore = core;
+    markSynced();
+  } catch (e) {
+    setSync('error', '⚠ オフライン（後で再同期）');
+  } finally {
+    GH.pushing = false;
+  }
+}
+
+function ghSchedulePush() {
+  if (!ghConfigured()) return;
+  clearTimeout(GH.pushTimer);
+  setSync('syncing', '↑ 保存待ち…');
+  GH.pushTimer = setTimeout(() => ghPush(), 1500);
+}
+
+function markSynced() {
+  const t = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+  setSync('saved', '☁ 同期済 ' + t);
+}
+
+// ── 設定モーダル ──
+function openSyncSettings() {
+  document.getElementById('ghOwner').value = GH.cfg.owner;
+  document.getElementById('ghRepo').value = GH.cfg.repo;
+  document.getElementById('ghPath').value = GH.cfg.path;
+  document.getElementById('ghBranch').value = GH.cfg.branch;
+  document.getElementById('ghToken').value = GH.token;
+  document.getElementById('ghTestResult').textContent = '';
+  document.getElementById('syncModal').classList.add('open');
+}
+function closeSyncSettings() { document.getElementById('syncModal').classList.remove('open'); }
+
+function saveSyncSettings() {
+  GH.cfg = {
+    owner: document.getElementById('ghOwner').value.trim(),
+    repo: document.getElementById('ghRepo').value.trim(),
+    path: (document.getElementById('ghPath').value.trim() || 'data.json'),
+    branch: (document.getElementById('ghBranch').value.trim() || 'main'),
+  };
+  GH.token = document.getElementById('ghToken').value.trim();
+  localStorage.setItem('wikiGhCfg', JSON.stringify(GH.cfg));
+  localStorage.setItem('wikiGhToken', GH.token);
+  GH.sha = null; GH.lastSyncedCore = null;
+  closeSyncSettings();
+  if (ghConfigured()) ghPull(); else setSync('', '⚙ 同期未設定');
+}
+
+async function testSyncConnection() {
+  const owner = document.getElementById('ghOwner').value.trim();
+  const repo = document.getElementById('ghRepo').value.trim();
+  const branch = document.getElementById('ghBranch').value.trim() || 'main';
+  const token = document.getElementById('ghToken').value.trim();
+  const out = document.getElementById('ghTestResult');
+  if (!owner || !repo || !token) { out.style.color = '#fbbf24'; out.textContent = 'ユーザー名・リポジトリ・トークンを入力してください'; return; }
+  out.style.color = '#9aa0b4'; out.textContent = '接続テスト中…';
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, cache: 'no-store'
+    });
+    if (res.ok) {
+      const j = await res.json();
+      out.style.color = '#34d399';
+      out.textContent = `✓ 接続OK（${j.full_name}${j.private ? ' / 非公開' : ' / ⚠公開リポジトリ'}, 書込:${j.permissions && j.permissions.push ? '可' : '不可'}）`;
+    } else if (res.status === 404) { out.style.color = '#f87171'; out.textContent = '✕ リポジトリが見つからない／トークンに権限がありません'; }
+    else if (res.status === 401) { out.style.color = '#f87171'; out.textContent = '✕ トークンが無効です'; }
+    else { out.style.color = '#f87171'; out.textContent = '✕ エラー ' + res.status; }
+  } catch (e) { out.style.color = '#f87171'; out.textContent = '✕ 通信エラー（CORS/ネットワーク）'; }
+}
+
+// ── 初期化 & 自動取得 ──
+function ghInit() {
+  if (!ghConfigured()) { setSync('', '⚙ 同期未設定'); return; }
+  ghPull({ initial: true });
+  // 他PCの変更を取り込む: タブにフォーカスが戻ったとき + 60秒ごと
+  window.addEventListener('focus', () => ghPull());
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) ghPull(); });
+  setInterval(() => { if (!document.hidden) ghPull(); }, 60000);
+}
+ghInit();
+</script>
+
+<!-- 同期設定モーダル -->
+<div class="confirm-overlay" id="syncModal">
+  <div class="confirm-box" style="width:440px;text-align:left;">
+    <h3 style="text-align:center;">⚙ GitHub 同期設定</h3>
+    <p style="text-align:center;margin-bottom:16px;">2台のPCで同じ非公開リポジトリを指定すると内容が同期されます。</p>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--text-muted);">
+      <label>GitHub ユーザー名
+        <input id="ghOwner" type="text" placeholder="例: yourname" autocomplete="off"
+          style="width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid var(--border);background:#0f1117;color:#e2e4f0;font-size:13px;box-sizing:border-box;">
+      </label>
+      <label>データ用リポジトリ名（非公開）
+        <input id="ghRepo" type="text" placeholder="例: wiki-data" autocomplete="off"
+          style="width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid var(--border);background:#0f1117;color:#e2e4f0;font-size:13px;box-sizing:border-box;">
+      </label>
+      <div style="display:flex;gap:10px;">
+        <label style="flex:2;">ファイルパス
+          <input id="ghPath" type="text" value="data.json" autocomplete="off"
+            style="width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid var(--border);background:#0f1117;color:#e2e4f0;font-size:13px;box-sizing:border-box;">
+        </label>
+        <label style="flex:1;">ブランチ
+          <input id="ghBranch" type="text" value="main" autocomplete="off"
+            style="width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid var(--border);background:#0f1117;color:#e2e4f0;font-size:13px;box-sizing:border-box;">
+        </label>
+      </div>
+      <label>アクセストークン（fine-grained PAT）
+        <input id="ghToken" type="password" placeholder="github_pat_..." autocomplete="off"
+          style="width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid var(--border);background:#0f1117;color:#e2e4f0;font-size:13px;box-sizing:border-box;">
+      </label>
+      <div style="font-size:11px;color:#6b7180;line-height:1.5;">
+        トークンはこのブラウザ内にのみ保存されます。データ用リポジトリだけに権限を絞った fine-grained PAT（Contents: Read and write）を使ってください。
+      </div>
+      <div id="ghTestResult" style="font-size:12px;min-height:16px;"></div>
+    </div>
+    <div class="confirm-actions" style="margin-top:18px;">
+      <button class="confirm-btn cancel" onclick="closeSyncSettings()">閉じる</button>
+      <button class="confirm-btn cancel" onclick="testSyncConnection()">接続テスト</button>
+      <button class="confirm-btn danger" style="background:#2563eb;" onclick="saveSyncSettings()">保存して同期</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
