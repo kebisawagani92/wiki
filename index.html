@@ -497,6 +497,7 @@ body {
 }
 
 .editor b, .editor strong { color: #fff; }
+.editor img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin: 6px 0; cursor: default; }
 
 .editor ul, .editor ol { padding-left: 1.8em; margin: 0.3em 0; }
 .editor ul ul, .editor ol ol, .editor ul ol, .editor ol ul { margin: 0.1em 0; }
@@ -1590,6 +1591,20 @@ document.getElementById('editor').addEventListener('blur', () => {
 
 document.getElementById('editor').addEventListener('paste', (e) => {
   e.preventDefault();
+
+  // 画像ペースト
+  const imageItem = Array.from(e.clipboardData.items).find(it => it.type.startsWith('image/'));
+  if (imageItem) {
+    const file = imageItem.getAsFile();
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.execCommand('insertHTML', false, `<img src="${ev.target.result}" alt="">`);
+      scheduleSave();
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+
   const html = e.clipboardData.getData('text/html');
   const text = e.clipboardData.getData('text/plain');
 
