@@ -1592,16 +1592,26 @@ document.getElementById('editor').addEventListener('blur', () => {
 document.getElementById('editor').addEventListener('paste', (e) => {
   e.preventDefault();
 
-  // 画像ペースト
+  // 画像ペースト（Canvas で圧縮・リサイズ）
   const imageItem = Array.from(e.clipboardData.items).find(it => it.type.startsWith('image/'));
   if (imageItem) {
     const file = imageItem.getAsFile();
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      document.execCommand('insertHTML', false, `<img src="${ev.target.result}" alt="">`);
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1200;
+      const scale = img.width > MAX ? MAX / img.width : 1;
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      const compressed = canvas.toDataURL('image/webp', 0.82);
+      document.execCommand('insertHTML', false, `<img src="${compressed}" alt="">`);
       scheduleSave();
     };
-    reader.readAsDataURL(file);
+    img.src = url;
     return;
   }
 
