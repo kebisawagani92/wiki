@@ -678,6 +678,7 @@ body {
   transition: all 0.15s;
 }
 .trash-sidebar-btn:hover { background: var(--surface); color: var(--text-dim); }
+.trash-sidebar-btn.drag-over { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px dashed rgba(239,68,68,0.5); }
 .trash-badge {
   margin-left: auto;
   background: rgba(239,68,68,0.2);
@@ -859,7 +860,7 @@ body {
   <div class="sidebar-section-label" id="treeLabel">ページ</div>
   <div class="page-tree" id="pageTree"></div>
   <div class="sidebar-trash">
-    <button class="trash-sidebar-btn" onclick="openTrash()">
+    <button class="trash-sidebar-btn" id="trashSidebarBtn" onclick="openTrash()">
       🗑 ごみ箱
       <span class="trash-badge" id="trashBadge"></span>
     </button>
@@ -1714,6 +1715,27 @@ document.addEventListener('click', (e) => {
 renderTree();
 openPage(currentPage);
 updateTrashCount();
+
+// ── TRASH DRAG & DROP ────────────────────────────────────
+(function() {
+  const btn = document.getElementById('trashSidebarBtn');
+  btn.addEventListener('dragover', (e) => {
+    if (!draggedPage) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    btn.classList.add('drag-over');
+  });
+  btn.addEventListener('dragleave', (e) => {
+    if (!btn.contains(e.relatedTarget)) btn.classList.remove('drag-over');
+  });
+  btn.addEventListener('drop', (e) => {
+    e.preventDefault();
+    btn.classList.remove('drag-over');
+    if (!draggedPage || draggedPage === rootName) return;
+    deletePage(draggedPage);
+  });
+})();
+
 window.addEventListener('beforeunload', saveCurrent);
 
 // ════════════════════════════════════════════════════════
