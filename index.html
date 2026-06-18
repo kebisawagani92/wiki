@@ -799,6 +799,48 @@ body {
   transition: all 0.15s;
 }
 .trash-empty-all-btn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+.trash-item { cursor: default; }
+.trash-item:hover .trash-item-name::after { content: ' — ダブルクリックで内容確認'; font-size: 10px; color: var(--text-muted); }
+
+/* ── TRASH PREVIEW MODAL ── */
+.trash-preview-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.trash-preview-overlay.open { opacity: 1; pointer-events: all; }
+.trash-preview-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: min(700px, 90vw);
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  transform: scale(0.97) translateY(8px);
+  transition: transform 0.15s;
+}
+.trash-preview-overlay.open .trash-preview-modal { transform: scale(1) translateY(0); }
+.trash-preview-modal-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.trash-preview-modal-header h3 { font-size: 15px; font-weight: 600; color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trash-preview-close {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  font-size: 18px; line-height: 1; padding: 4px 8px; border-radius: 6px; flex-shrink: 0;
+}
+.trash-preview-close:hover { background: var(--surface2); color: var(--text); }
+.trash-preview-body {
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+  font-size: 14px; line-height: 1.7; color: var(--text);
+}
+.trash-preview-body::-webkit-scrollbar { width: 4px; }
+.trash-preview-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+.trash-preview-empty { color: var(--text-muted); font-style: italic; }
+.trash-preview-subpage { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.trash-preview-subpage-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -913,6 +955,17 @@ body {
     <div class="trash-modal-footer">
       <button class="trash-empty-all-btn" onclick="emptyTrash()">すべて完全削除</button>
     </div>
+  </div>
+</div>
+
+<!-- TRASH PREVIEW MODAL -->
+<div class="trash-preview-overlay" id="trashPreviewOverlay">
+  <div class="trash-preview-modal">
+    <div class="trash-preview-modal-header">
+      <h3 id="trashPreviewTitle"></h3>
+      <button class="trash-preview-close" onclick="closeTrashPreview()">✕</button>
+    </div>
+    <div class="trash-preview-body" id="trashPreviewBody"></div>
   </div>
 </div>
 
@@ -1150,6 +1203,39 @@ function closeTrash() {
   document.getElementById('trashOverlay').classList.remove('open');
 }
 
+function openTrashPreview(idx) {
+  const item = trash[idx];
+  document.getElementById('trashPreviewTitle').textContent = '📄 ' + item.root;
+  const body = document.getElementById('trashPreviewBody');
+  const pages = item.subtree;
+  const order = [item.root, ...collectDescendants(item.root, pages)];
+  let html = '';
+  order.forEach((name, i) => {
+    const content = pages[name]?.content || '';
+    const isEmpty = !content.trim();
+    if (i > 0) {
+      html += `<div class="trash-preview-subpage"><div class="trash-preview-subpage-title">└ ${escapeHtml(name)}</div>`;
+    }
+    html += isEmpty ? '<p class="trash-preview-empty">（本文なし）</p>' : content;
+    if (i > 0) html += '</div>';
+  });
+  body.innerHTML = html;
+  document.getElementById('trashPreviewOverlay').classList.add('open');
+}
+
+function closeTrashPreview() {
+  document.getElementById('trashPreviewOverlay').classList.remove('open');
+}
+
+function collectDescendants(name, subtree) {
+  const result = [];
+  (subtree[name]?.children || []).forEach(c => {
+    result.push(c);
+    result.push(...collectDescendants(c, subtree));
+  });
+  return result;
+}
+
 function renderTrashList() {
   const list = document.getElementById('trashList');
   list.innerHTML = '';
@@ -1175,6 +1261,9 @@ function renderTrashList() {
         <button class="trash-restore-btn" data-idx="${idx}">復元</button>
         <button class="trash-del-btn" data-idx="${idx}">完全削除</button>
       </div>`;
+    row.addEventListener('dblclick', (e) => {
+      if (!e.target.closest('button')) openTrashPreview(idx);
+    });
     list.appendChild(row);
   });
   list.querySelectorAll('.trash-restore-btn').forEach(btn => {
@@ -1601,7 +1690,7 @@ document.addEventListener('click', (e) => {
 
 // ── GLOBAL KEYBOARD ───────────────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeConfirm(false); closeTrash(); }
+  if (e.key === 'Escape') { closeConfirm(false); closeTrashPreview(); closeTrash(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
     e.preventDefault();
     quickCreate();
