@@ -754,7 +754,6 @@ body {
 .trash-item-info { flex: 1; min-width: 0; }
 .trash-item-name { font-size: 13.5px; color: var(--text); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trash-item-meta { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
-.trash-item-preview { font-size: 11.5px; color: var(--text-dim); display: block; margin-top: 4px; white-space: pre-wrap; line-height: 1.5; max-height: 4.5em; overflow: hidden; opacity: 0.75; }
 .trash-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .trash-restore-btn {
   background: rgba(99,102,241,0.15);
@@ -1248,14 +1247,10 @@ function renderTrashList() {
     const count = Object.keys(item.subtree).length;
     const row = document.createElement('div');
     row.className = 'trash-item';
-    const rawContent = item.subtree[item.root]?.content || '';
-    const bodyText = rawContent.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
-    const preview = bodyText ? escapeHtml(bodyText.slice(0, 120)) + (bodyText.length > 120 ? '…' : '') : '';
     row.innerHTML = `
       <div class="trash-item-info">
         <span class="trash-item-name">📄 ${escapeHtml(item.root)}</span>
         <span class="trash-item-meta">${count > 1 ? count + 'ページ含む · ' : ''}${date}</span>
-        ${preview ? `<span class="trash-item-preview">${preview}</span>` : ''}
       </div>
       <div class="trash-item-actions">
         <button class="trash-restore-btn" data-idx="${idx}">復元</button>
