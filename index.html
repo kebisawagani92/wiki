@@ -1162,8 +1162,9 @@ function renderTrashList() {
     const count = Object.keys(item.subtree).length;
     const row = document.createElement('div');
     row.className = 'trash-item';
-    const body = (item.subtree[item.root]?.body || '').trim();
-    const preview = body ? escapeHtml(body.slice(0, 120)) + (body.length > 120 ? '…' : '') : '';
+    const rawContent = item.subtree[item.root]?.content || '';
+    const bodyText = rawContent.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+    const preview = bodyText ? escapeHtml(bodyText.slice(0, 120)) + (bodyText.length > 120 ? '…' : '') : '';
     row.innerHTML = `
       <div class="trash-item-info">
         <span class="trash-item-name">📄 ${escapeHtml(item.root)}</span>
