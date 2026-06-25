@@ -930,6 +930,19 @@ body {
 .mob-page-item:active { background: var(--surface2); }
 .mob-page-item.active { background: rgba(99,102,241,0.15); color: #fff; }
 .mob-page-item .mob-page-icon { font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
+.mob-page-item .mob-page-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mob-page-del {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-page-del:active { background: rgba(239,68,68,0.15); color: #ef4444; }
 
 .hamburger { display: none; }
 .sidebar-overlay { display: none; }
@@ -2151,8 +2164,11 @@ function renderMobilePageList() {
     item.className = 'mob-page-item' + (name === currentPage ? ' active' : '');
     item.style.paddingLeft = (12 + depth * 16) + 'px';
     const icon = depth > 0 ? '└' : '📄';
-    item.innerHTML = `<span class="mob-page-icon">${icon}</span>${escapeHtml(name)}`;
-    item.onclick = () => { openPage(name); closeMobilePages(); };
+    const delHtml = name !== rootName ? `<button class="mob-page-del" data-name="${escapeHtml(name)}">🗑</button>` : '';
+    item.innerHTML = `<span class="mob-page-icon">${icon}</span><span class="mob-page-name">${escapeHtml(name)}</span>${delHtml}`;
+    item.querySelector('.mob-page-name').onclick = () => { openPage(name); closeMobilePages(); };
+    const delBtn = item.querySelector('.mob-page-del');
+    if (delBtn) delBtn.onclick = (e) => { e.stopPropagation(); deletePage(name); renderMobilePageList(); };
     scroll.appendChild(item);
     (pages[name].children || []).forEach(c => node(c, depth + 1));
   }
