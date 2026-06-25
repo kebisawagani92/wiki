@@ -842,6 +842,72 @@ body {
 .trash-preview-empty { color: var(--text-muted); font-style: italic; }
 .trash-preview-subpage { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
 .trash-preview-subpage-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+
+/* ── MOBILE HAMBURGER ── */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.hamburger:hover { background: var(--surface2); }
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .hamburger { display: flex; align-items: center; }
+
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    width: min(280px, 85vw);
+    box-shadow: none;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+  }
+  .sidebar-overlay.open { display: block; }
+
+  .search-bar { padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
+  .search-wrap { max-width: 100%; flex: 1; }
+
+  .toolbar {
+    padding: 8px 10px;
+    gap: 2px;
+    flex-wrap: wrap;
+  }
+  .tool-group { padding: 0 2px; }
+  .tb-btn { padding: 8px 10px; font-size: 14px; }
+  .tb-select { font-size: 14px; padding: 6px 8px; }
+  .status-pill { font-size: 10px; padding: 3px 8px; }
+
+  .editor-area { padding: 0 16px; }
+  .page-title-wrap { padding: 24px 0 8px; }
+  #pageTitle { font-size: 24px; }
+  .editor { font-size: 15px; padding-bottom: 40px; }
+
+  .modal { width: min(340px, 90vw); padding: 20px; }
+  .confirm-box { width: min(300px, 90vw); }
+  .trash-modal { width: min(440px, 95vw); }
+  #syncModal .confirm-box { width: min(440px, 95vw); }
+}
 </style>
 </head>
 <body>
@@ -871,10 +937,14 @@ body {
   </div>
 </div>
 
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <!-- MAIN -->
 <div class="main">
   <!-- SEARCH BAR -->
   <div class="search-bar">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" title="メニュー">☰</button>
     <div class="search-wrap" id="searchWrap">
       <span class="search-icon">🔍</span>
       <input class="search-input" id="searchInput" type="text" placeholder="ページを検索 (Ctrl+K)" autocomplete="off">
@@ -1026,7 +1096,7 @@ function renderTree() {
     label.className = 'page-name';
     label.textContent = name;
 
-    label.onclick = (e) => { e.stopPropagation(); openPage(name); };
+    label.onclick = (e) => { e.stopPropagation(); openPage(name); closeSidebar(); };
 
     label.ondblclick = (e) => {
       e.stopPropagation();
@@ -1967,6 +2037,16 @@ async function testSyncConnection() {
     else if (res.status === 401) { out.style.color = '#f87171'; out.textContent = '✕ トークンが無効です'; }
     else { out.style.color = '#f87171'; out.textContent = '✕ エラー ' + res.status; }
   } catch (e) { out.style.color = '#f87171'; out.textContent = '✕ 通信エラー（CORS/ネットワーク）'; }
+}
+
+// ── MOBILE SIDEBAR ──────────────────────────────────
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
 }
 
 // ── 初期化 & 自動取得 ──
