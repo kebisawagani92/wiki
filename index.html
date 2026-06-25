@@ -2168,7 +2168,11 @@ function renderMobilePageList() {
     item.innerHTML = `<span class="mob-page-icon">${icon}</span><span class="mob-page-name">${escapeHtml(name)}</span>${delHtml}`;
     item.querySelector('.mob-page-name').onclick = () => { openPage(name); closeMobilePages(); };
     const delBtn = item.querySelector('.mob-page-del');
-    if (delBtn) delBtn.onclick = (e) => { e.stopPropagation(); deletePage(name); renderMobilePageList(); };
+    if (delBtn) delBtn.onclick = async (e) => {
+      e.stopPropagation();
+      const ok = await showConfirm(`「${name}」を削除しますか？`);
+      if (ok) { deletePage(name); renderMobilePageList(); }
+    };
     scroll.appendChild(item);
     (pages[name].children || []).forEach(c => node(c, depth + 1));
   }
