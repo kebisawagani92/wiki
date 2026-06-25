@@ -960,6 +960,61 @@ body {
   cursor: pointer;
 }
 .mob-page-toggle.open { transform: rotate(90deg); }
+.mob-page-move {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-page-move:active { background: rgba(99,102,241,0.15); color: var(--accent); }
+
+/* ── MOVE DESTINATION MODAL ── */
+.move-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.move-overlay.open { opacity: 1; pointer-events: all; }
+.move-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: min(360px, 92vw);
+  max-height: 70vh;
+  display: flex; flex-direction: column;
+  transform: scale(0.97); transition: transform 0.15s;
+}
+.move-overlay.open .move-modal { transform: scale(1); }
+.move-modal-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.move-modal-header h3 { font-size: 16px; font-weight: 600; color: #fff; }
+.move-modal-close {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  font-size: 18px; padding: 4px 8px; border-radius: 6px;
+}
+.move-modal-close:hover { background: var(--surface2); color: var(--text); }
+.move-list {
+  flex: 1; overflow-y: auto; padding: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.move-dest {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px; border-radius: 8px; cursor: pointer;
+  font-size: 15px; color: var(--text-dim);
+  border: 1px solid var(--border); background: var(--surface);
+  margin-bottom: 4px; transition: all 0.12s;
+}
+.move-dest:active { transform: scale(0.97); background: var(--bg); }
+.move-dest.selected { border-color: var(--accent); background: rgba(99,102,241,0.15); color: #fff; }
 .mob-page-item .mob-page-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mob-page-del {
   flex-shrink: 0;
@@ -1022,10 +1077,16 @@ body {
       <span class="logo-icon">✦</span>
       Wiki
     </div>
-    <button class="new-page-btn" onclick="quickCreate()">
-      <span class="plus">+</span>
-      新規ページ
-    </button>
+    <div style="display:flex;gap:6px;">
+      <button class="new-page-btn" onclick="quickCreate()" style="flex:1;">
+        <span class="plus">+</span>
+        新規ページ
+      </button>
+      <button class="new-page-btn" onclick="quickCreateFolder()" style="flex:1;">
+        <span class="plus">📁</span>
+        新規フォルダ
+      </button>
+    </div>
   </div>
   <div class="sidebar-section-label" id="treeLabel">ページ</div>
   <div class="page-tree" id="pageTree"></div>
@@ -1045,6 +1106,7 @@ body {
   <div class="mobile-page-list-header">
     <h2>ページ一覧</h2>
     <div class="mobile-page-list-actions">
+      <button class="mob-action-btn" onclick="quickCreateFolder(); renderMobilePageList();">📁 フォルダ</button>
       <button class="mob-action-btn" onclick="quickCreate(); closeMobilePages();">＋ 新規</button>
     </div>
   </div>
@@ -1168,6 +1230,17 @@ body {
   </div>
 </div>
 
+<!-- MOVE DESTINATION MODAL -->
+<div class="move-overlay" id="moveOverlay">
+  <div class="move-modal">
+    <div class="move-modal-header">
+      <h3 id="moveTitle">移動先を選択</h3>
+      <button class="move-modal-close" onclick="closeMoveModal()">✕</button>
+    </div>
+    <div class="move-list" id="moveList"></div>
+  </div>
+</div>
+
 <!-- PAGE DROPDOWN MENU -->
 <div class="page-dropdown" id="pageDropdown">
   <div class="page-dd-item danger" id="ddDeleteBtn">🗑 削除</div>
@@ -1224,7 +1297,8 @@ function renderTree() {
     wrap.className = 'page-item' + (name === currentPage ? ' active' : '');
     wrap.style.paddingLeft = (10 + depth * 14) + 'px';
 
-    if (hasChildren) {
+    const isFolder = pages[name].isFolder || hasChildren;
+    if (isFolder) {
       const toggle = document.createElement('span');
       toggle.className = 'page-toggle' + (isOpen ? ' open' : '');
       toggle.textContent = '▶';
@@ -1239,7 +1313,7 @@ function renderTree() {
 
     const icon = document.createElement('span');
     icon.className = 'page-icon';
-    icon.textContent = hasChildren ? (isOpen ? '📂' : '📁') : '📄';
+    icon.textContent = isFolder ? (isOpen ? '📂' : '📁') : '📄';
     wrap.appendChild(icon);
 
     const label = document.createElement('span');
@@ -1699,6 +1773,51 @@ function quickCreate(parentName) {
   setTimeout(() => {
     document.getElementById('pageTitle').focus(); // タイトル欄は openPage で空表示済み。フォーカスのみ
   }, 30);
+}
+
+function quickCreateFolder(parentName) {
+  const parent = (parentName && pages[parentName]) ? parentName : (currentPage || rootName);
+  const base = '新規フォルダ';
+  let name = base;
+  let i = 2;
+  while (pages[name]) { name = `${base} ${i++}`; }
+  pages[name] = { content: '', children: [], untitled: true, isFolder: true };
+  pages[parent].children.push(name);
+  persist();
+  renderTree();
+}
+
+// ── MOVE MODAL (MOBILE) ─────────────────────────────
+let moveTargetPage = null;
+
+function openMoveModal(name) {
+  moveTargetPage = name;
+  document.getElementById('moveTitle').textContent = `「${name}」の移動先`;
+  const list = document.getElementById('moveList');
+  list.innerHTML = '';
+  function addDest(n, depth) {
+    if (n === name || isAncestorOf(name, n)) return;
+    const item = document.createElement('div');
+    item.className = 'move-dest';
+    item.style.paddingLeft = (12 + depth * 16) + 'px';
+    const hasChildren = (pages[n].children || []).length > 0;
+    const icon = pages[n].isFolder ? '📁' : (hasChildren ? '📂' : '📄');
+    item.innerHTML = `${icon} ${escapeHtml(n)}`;
+    item.onclick = () => {
+      movePage(name, n, 'into');
+      closeMoveModal();
+      renderMobilePageList();
+    };
+    list.appendChild(item);
+    (pages[n].children || []).forEach(c => addDest(c, depth + 1));
+  }
+  addDest(rootName, 0);
+  document.getElementById('moveOverlay').classList.add('open');
+}
+
+function closeMoveModal() {
+  document.getElementById('moveOverlay').classList.remove('open');
+  moveTargetPage = null;
 }
 
 // ── DELETE PAGE (→ TRASH) ─────────────────────────────
@@ -2219,10 +2338,12 @@ function renderMobilePageList() {
     const item = document.createElement('div');
     item.className = 'mob-page-item' + (name === currentPage ? ' active' : '');
     item.style.paddingLeft = (12 + depth * 16) + 'px';
-    const toggleHtml = hasChildren ? `<span class="mob-page-toggle${isOpen ? ' open' : ''}" data-name="${escapeHtml(name)}">▶</span>` : '';
-    const iconStr = hasChildren ? (isOpen ? '📂' : '📁') : '📄';
+    const isFolder = pages[name].isFolder || hasChildren;
+    const toggleHtml = isFolder ? `<span class="mob-page-toggle${isOpen ? ' open' : ''}" data-name="${escapeHtml(name)}">▶</span>` : '';
+    const iconStr = isFolder ? (isOpen ? '📂' : '📁') : '📄';
+    const moveHtml = name !== rootName ? `<button class="mob-page-move" data-name="${escapeHtml(name)}" title="移動">↗</button>` : '';
     const delHtml = name !== rootName ? `<button class="mob-page-del" data-name="${escapeHtml(name)}">🗑</button>` : '';
-    item.innerHTML = `${toggleHtml}<span class="mob-page-icon">${iconStr}</span><span class="mob-page-name">${escapeHtml(name)}</span>${delHtml}`;
+    item.innerHTML = `${toggleHtml}<span class="mob-page-icon">${iconStr}</span><span class="mob-page-name">${escapeHtml(name)}</span>${moveHtml}${delHtml}`;
     item.addEventListener('touchstart', () => { item.classList.add('pressed'); }, { passive: true });
     item.addEventListener('touchend', () => { item.classList.remove('pressed'); });
     item.addEventListener('touchcancel', () => { item.classList.remove('pressed'); });
@@ -2234,6 +2355,8 @@ function renderMobilePageList() {
       localStorage.setItem('wikiCollapsed', JSON.stringify(collapsed));
       renderMobilePageList();
     };
+    const moveBtn = item.querySelector('.mob-page-move');
+    if (moveBtn) moveBtn.onclick = (e) => { e.stopPropagation(); openMoveModal(name); };
     const delBtn = item.querySelector('.mob-page-del');
     if (delBtn) delBtn.onclick = async (e) => {
       e.stopPropagation();
