@@ -291,9 +291,9 @@ body {
 .page-icon { flex-shrink: 0; font-size: 13px; width: 16px; text-align: center; }
 .page-toggle {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  font-size: 10px;
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -301,7 +301,13 @@ body {
   cursor: pointer;
   transition: transform 0.15s;
   user-select: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  position: relative;
+}
+.page-toggle::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
 }
 .page-toggle:hover { background: rgba(255,255,255,0.08); }
 .page-toggle.open { transform: rotate(90deg); }
@@ -971,6 +977,12 @@ body {
   background: var(--surface2);
   border: 1px solid var(--border);
   -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.mob-page-toggle::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 .mob-page-toggle:active { background: rgba(99,102,241,0.2); }
 .mob-page-toggle.open { transform: rotate(90deg); }
