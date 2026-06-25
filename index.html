@@ -307,7 +307,10 @@ body {
 .page-toggle::before {
   content: '';
   position: absolute;
-  inset: -6px;
+  top: -6px;
+  bottom: -6px;
+  right: -6px;
+  left: -100px;
 }
 .page-toggle:hover { background: rgba(255,255,255,0.08); }
 .page-toggle.open { transform: rotate(90deg); }
@@ -982,7 +985,10 @@ body {
 .mob-page-toggle::before {
   content: '';
   position: absolute;
-  inset: -8px;
+  top: -8px;
+  bottom: -8px;
+  right: -8px;
+  left: -100px;
 }
 .mob-page-toggle:active { background: rgba(99,102,241,0.2); }
 .mob-page-toggle.open { transform: rotate(90deg); }
