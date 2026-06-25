@@ -257,13 +257,15 @@ body {
   cursor: pointer;
   font-size: 13.5px;
   color: var(--text-dim);
-  transition: all 0.15s;
+  transition: all 0.12s;
   position: relative;
   user-select: none;
+  border: 1px solid transparent;
 }
 
-.page-item:hover { background: var(--surface); color: var(--text); }
-.page-item.active { background: rgba(99,102,241,0.15); color: #fff; }
+.page-item:hover { background: var(--surface); color: var(--text); border-color: var(--border); }
+.page-item:active { transform: scale(0.97); background: var(--surface2); }
+.page-item.active { background: rgba(99,102,241,0.15); color: #fff; border-color: rgba(99,102,241,0.3); }
 .page-item.active::before {
   content: '';
   position: absolute;
