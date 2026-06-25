@@ -252,20 +252,23 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 7px 10px;
-  border-radius: 7px;
+  padding: 8px 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13.5px;
   color: var(--text-dim);
   transition: all 0.12s;
   position: relative;
   user-select: none;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-.page-item:hover { background: var(--surface); color: var(--text); border-color: var(--border); }
-.page-item:active { transform: scale(0.97); background: var(--surface2); }
-.page-item.active { background: rgba(99,102,241,0.15); color: #fff; border-color: rgba(99,102,241,0.3); }
+.page-item:hover { background: var(--surface2); color: #fff; border-color: rgba(255,255,255,0.12); box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+.page-item:active { transform: scale(0.96); box-shadow: none; background: var(--bg); }
+.page-item.active { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15)); color: #fff; border-color: rgba(99,102,241,0.4); box-shadow: 0 1px 4px rgba(99,102,241,0.25); }
 .page-item.active::before {
   content: '';
   position: absolute;
