@@ -924,16 +924,20 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 12px;
+  padding: 14px 14px;
   border-radius: 10px;
   font-size: 16px;
   color: var(--text-dim);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.12s;
   -webkit-tap-highlight-color: transparent;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-.mob-page-item:active { background: var(--surface2); }
-.mob-page-item.active { background: rgba(99,102,241,0.15); color: #fff; }
+.mob-page-item:active { transform: scale(0.97); box-shadow: none; background: var(--bg); }
+.mob-page-item.active { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15)); color: #fff; border-color: rgba(99,102,241,0.4); box-shadow: 0 1px 4px rgba(99,102,241,0.25); }
 .mob-page-item .mob-page-icon { font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
 .mob-page-item .mob-page-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mob-page-del {
