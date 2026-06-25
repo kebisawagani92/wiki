@@ -288,6 +288,18 @@ body {
 .page-item.drag-over-after { box-shadow: inset 0 -2px 0 0 var(--accent); }
 
 .page-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page-icon { flex-shrink: 0; font-size: 13px; width: 16px; text-align: center; }
+.page-toggle {
+  flex-shrink: 0;
+  width: 16px;
+  font-size: 10px;
+  text-align: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: transform 0.15s;
+  user-select: none;
+}
+.page-toggle.open { transform: rotate(90deg); }
 .page-add {
   opacity: 0;
   width: 18px;
@@ -939,6 +951,15 @@ body {
 .mob-page-item:active, .mob-page-item.pressed { transform: scale(0.95); box-shadow: none; background: var(--bg); opacity: 0.7; }
 .mob-page-item.active { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15)); color: #fff; border-color: rgba(99,102,241,0.4); box-shadow: 0 1px 4px rgba(99,102,241,0.25); }
 .mob-page-item .mob-page-icon { font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
+.mob-page-toggle {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px;
+  transition: transform 0.15s;
+  cursor: pointer;
+}
+.mob-page-toggle.open { transform: rotate(90deg); }
 .mob-page-item .mob-page-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mob-page-del {
   flex-shrink: 0;
@@ -1185,6 +1206,7 @@ let confirmResolve = null;
 let draggedPage = null;
 let savedEditorRange = null;
 let trash = JSON.parse(localStorage.getItem('wikiTrash') || '[]');
+let collapsed = JSON.parse(localStorage.getItem('wikiCollapsed') || '{}');
 
 const savedFs = localStorage.getItem('wikiFontSize') || '16';
 document.documentElement.style.setProperty('--fs', savedFs + 'px');
@@ -1195,9 +1217,30 @@ function renderTree() {
   tree.innerHTML = '';
 
   function node(name, depth) {
+    const hasChildren = (pages[name].children || []).length > 0;
+    const isOpen = !collapsed[name];
+
     const wrap = document.createElement('div');
     wrap.className = 'page-item' + (name === currentPage ? ' active' : '');
     wrap.style.paddingLeft = (10 + depth * 14) + 'px';
+
+    if (hasChildren) {
+      const toggle = document.createElement('span');
+      toggle.className = 'page-toggle' + (isOpen ? ' open' : '');
+      toggle.textContent = '▶';
+      toggle.onclick = (e) => {
+        e.stopPropagation();
+        collapsed[name] = !collapsed[name];
+        localStorage.setItem('wikiCollapsed', JSON.stringify(collapsed));
+        renderTree();
+      };
+      wrap.appendChild(toggle);
+    }
+
+    const icon = document.createElement('span');
+    icon.className = 'page-icon';
+    icon.textContent = hasChildren ? (isOpen ? '📂' : '📁') : '📄';
+    wrap.appendChild(icon);
 
     const label = document.createElement('span');
     label.className = 'page-name';
@@ -1304,7 +1347,9 @@ function renderTree() {
     });
 
     tree.appendChild(wrap);
-    (pages[name].children || []).forEach(c => node(c, depth + 1));
+    if (!collapsed[name]) {
+      (pages[name].children || []).forEach(c => node(c, depth + 1));
+    }
   }
 
   if (!pages[rootName]) {
@@ -2169,16 +2214,26 @@ function renderMobilePageList() {
   const scroll = document.getElementById('mobilePageScroll');
   scroll.innerHTML = '';
   function node(name, depth) {
+    const hasChildren = (pages[name].children || []).length > 0;
+    const isOpen = !collapsed[name];
     const item = document.createElement('div');
     item.className = 'mob-page-item' + (name === currentPage ? ' active' : '');
     item.style.paddingLeft = (12 + depth * 16) + 'px';
-    const icon = depth > 0 ? '└' : '📄';
+    const toggleHtml = hasChildren ? `<span class="mob-page-toggle${isOpen ? ' open' : ''}" data-name="${escapeHtml(name)}">▶</span>` : '';
+    const iconStr = hasChildren ? (isOpen ? '📂' : '📁') : '📄';
     const delHtml = name !== rootName ? `<button class="mob-page-del" data-name="${escapeHtml(name)}">🗑</button>` : '';
-    item.innerHTML = `<span class="mob-page-icon">${icon}</span><span class="mob-page-name">${escapeHtml(name)}</span>${delHtml}`;
+    item.innerHTML = `${toggleHtml}<span class="mob-page-icon">${iconStr}</span><span class="mob-page-name">${escapeHtml(name)}</span>${delHtml}`;
     item.addEventListener('touchstart', () => { item.classList.add('pressed'); }, { passive: true });
     item.addEventListener('touchend', () => { item.classList.remove('pressed'); });
     item.addEventListener('touchcancel', () => { item.classList.remove('pressed'); });
     item.querySelector('.mob-page-name').onclick = () => { openPage(name); closeMobilePages(); };
+    const toggleBtn = item.querySelector('.mob-page-toggle');
+    if (toggleBtn) toggleBtn.onclick = (e) => {
+      e.stopPropagation();
+      collapsed[name] = !collapsed[name];
+      localStorage.setItem('wikiCollapsed', JSON.stringify(collapsed));
+      renderMobilePageList();
+    };
     const delBtn = item.querySelector('.mob-page-del');
     if (delBtn) delBtn.onclick = async (e) => {
       e.stopPropagation();
@@ -2186,7 +2241,9 @@ function renderMobilePageList() {
       if (ok) { deletePage(name); renderMobilePageList(); }
     };
     scroll.appendChild(item);
-    (pages[name].children || []).forEach(c => node(c, depth + 1));
+    if (!collapsed[name]) {
+      (pages[name].children || []).forEach(c => node(c, depth + 1));
+    }
   }
   node(rootName, 0);
 }
