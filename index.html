@@ -1376,7 +1376,8 @@ function renderTree() {
       const finish = () => {
         label.contentEditable = false;
         const nName = label.textContent.trim();
-        if (!nName || nName === name || pages[nName]) { renderTree(); return; }
+        if (!nName || nName === name) { renderTree(); return; }
+        if (pages[nName]) { flashStatus('⚠ 同名ページが既にあります'); renderTree(); return; }
         pages[nName] = pages[name];
         delete pages[nName].untitled; // 正式名が付いたので未命名フラグを解除
         delete pages[name];
@@ -1385,6 +1386,7 @@ function renderTree() {
         });
         if (currentPage === name) currentPage = nName;
         if (rootName === name) { rootName = nName; localStorage.setItem('wikiRoot', rootName); } // ルートをリネームしたら追跡名も更新
+        renameHousekeeping(name, nName);
         persist();
         renderTree();
         if (currentPage === nName) document.getElementById('pageTitle').value = nName;
@@ -1490,6 +1492,19 @@ function findParent(name) {
   return Object.keys(pages).find(p => (pages[p].children || []).includes(name));
 }
 
+// リネーム時に pages 以外が旧名を参照し続けないようにする
+// （collapsed: 折りたたみ状態が外れる / trash.parent: 復元先がルートに落ちる）
+function renameHousekeeping(oldName, newName) {
+  if (oldName in collapsed) {
+    collapsed[newName] = collapsed[oldName];
+    delete collapsed[oldName];
+    localStorage.setItem('wikiCollapsed', JSON.stringify(collapsed));
+  }
+  let trashChanged = false;
+  trash.forEach(t => { if (t.parent === oldName) { t.parent = newName; trashChanged = true; } });
+  if (trashChanged) persistTrash();
+}
+
 function isAncestorOf(ancestor, name) {
   if (ancestor === name) return true;
   return (pages[ancestor]?.children || []).some(c => isAncestorOf(c, name));
@@ -1554,7 +1569,7 @@ function openTrashPreview(idx) {
     if (i > 0) {
       html += `<div class="trash-preview-subpage"><div class="trash-preview-subpage-title">└ ${escapeHtml(name)}</div>`;
     }
-    html += isEmpty ? '<p class="trash-preview-empty">（本文なし）</p>' : content;
+    html += isEmpty ? '<p class="trash-preview-empty">（本文なし）</p>' : sanitizeHtml(content);
     if (i > 0) html += '</div>';
   });
   body.innerHTML = html;
@@ -1673,9 +1688,24 @@ function escapeRegExp(s) {
 }
 
 function stripHtml(html) {
-  const d = document.createElement('div');
-  d.innerHTML = html;
-  return d.textContent || '';
+  // DOMParser の文書は不活性（scriptは実行されず、imgのsrc読込・onerrorも発火しない）
+  return new DOMParser().parseFromString(html || '', 'text/html').body.textContent || '';
+}
+
+// 本文HTMLの無害化: script等の危険タグ・on*イベント属性・javascript:系URLを除去。
+// エディタ/プレビューへ innerHTML で流し込む直前に必ず通す（リモートdata.json由来のHTMLも通る＝PAT保護）。
+// data:image/... はペースト画像で使うため許可し、data:text/html 等のみ拒否。
+function sanitizeHtml(html) {
+  const doc = new DOMParser().parseFromString(html || '', 'text/html');
+  doc.querySelectorAll('script, style, iframe, object, embed, link, meta, form').forEach(el => el.remove());
+  doc.body.querySelectorAll('*').forEach(el => {
+    [...el.attributes].forEach(a => {
+      const n = a.name.toLowerCase();
+      if (n.startsWith('on')) el.removeAttribute(a.name);
+      else if ((n === 'href' || n === 'src' || n === 'xlink:href') && /^\s*(javascript:|vbscript:|data:(?!image\/))/i.test(a.value)) el.removeAttribute(a.name);
+    });
+  });
+  return doc.body.innerHTML;
 }
 
 function renderSearch(query) {
@@ -1735,7 +1765,7 @@ function openPage(name) {
   if (editorLoaded) saveCurrent(); // 初回はエディタが空のため、保存済み内容を空で上書きしないようスキップ
   currentPage = name;
   document.getElementById('pageTitle').value = pages[name].untitled ? '' : name; // 未命名ページは空表示(プレースホルダー)
-  document.getElementById('editor').innerHTML = pages[name].content || '';
+  document.getElementById('editor').innerHTML = sanitizeHtml(pages[name].content || '');
   editorLoaded = true;
   renderTree();
 }
@@ -1747,10 +1777,26 @@ function saveCurrent() {
   persist();
 }
 
+let persistError = false; // localStorage 容量超過(~5MB)等の保存失敗。scheduleSave がステータスに反映
+
 function persist() {
-  localStorage.setItem('wikiPages', JSON.stringify(pages));
-  localStorage.setItem('wikiRoot', rootName);
+  persistError = false;
+  try {
+    localStorage.setItem('wikiPages', JSON.stringify(pages));
+    localStorage.setItem('wikiRoot', rootName);
+  } catch (e) {
+    persistError = true; // ローカル保存は失敗してもGitHub同期は続行（そちらが正本）
+  }
   if (typeof ghSchedulePush === 'function') ghSchedulePush();
+}
+
+// saveStatus ピルに一時メッセージを出す（2秒後に元へ戻す）
+function flashStatus(msg) {
+  const s = document.getElementById('saveStatus');
+  if (!s) return;
+  const prevText = s.textContent, prevClass = s.className;
+  s.textContent = msg; s.className = 'status-pill'; s.style.color = '#fbbf24';
+  setTimeout(() => { s.textContent = prevText; s.className = prevClass; s.style.color = ''; }, 2000);
 }
 
 // ── 外出先閲覧用エクスポート ────────────────────────────
@@ -1793,9 +1839,16 @@ function scheduleSave() {
   status.className = 'status-pill';
   saveTimer = setTimeout(() => {
     saveCurrent();
-    const t = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    status.textContent = `保存済み ${t}`;
-    status.className = 'status-pill saved';
+    if (persistError) {
+      status.textContent = '⚠ ローカル保存失敗（容量超過）';
+      status.className = 'status-pill';
+      status.style.color = '#f87171';
+    } else {
+      const t = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      status.textContent = `保存済み ${t}`;
+      status.className = 'status-pill saved';
+      status.style.color = '';
+    }
   }, 600);
 }
 
@@ -1869,7 +1922,8 @@ function deletePage(name) {
   }
   const subtree = {};
   const capture = (n) => {
-    subtree[n] = { content: pages[n].content, children: [...(pages[n].children || [])] };
+    // isFolder / untitled 等のフラグも保持する（content/childrenだけだと復元で空フォルダがページに化ける）
+    subtree[n] = { ...pages[n], children: [...(pages[n].children || [])] };
     (pages[n].children || []).forEach(capture);
   };
   capture(name);
@@ -2002,9 +2056,9 @@ document.getElementById('editor').addEventListener('paste', (e) => {
 
   let cleaned;
   if (html) {
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    tmp.querySelectorAll('style, meta, link, script, head').forEach(el => el.remove());
+    // DOMParser で不活性に解析（生divだと除去前に img の onerror 等が発火し得る）
+    const tmp = new DOMParser().parseFromString(html, 'text/html').body;
+    tmp.querySelectorAll('style, meta, link, script').forEach(el => el.remove());
     tmp.querySelectorAll('*').forEach(el => {
       el.removeAttribute('class');
       el.removeAttribute('id');
@@ -2021,7 +2075,7 @@ document.getElementById('editor').addEventListener('paste', (e) => {
       if (fi && fi !== 'normal') el.style.fontStyle = fi;
       if (td && td !== 'none') el.style.textDecoration = td;
     });
-    cleaned = tmp.innerHTML;
+    cleaned = sanitizeHtml(tmp.innerHTML); // on*属性・javascript:URL等を除去
   } else {
     cleaned = escapeHtml(text).replace(/\n/g, '<br>');
   }
@@ -2033,11 +2087,13 @@ document.getElementById('editor').addEventListener('paste', (e) => {
 document.getElementById('pageTitle').addEventListener('change', (e) => {
   const newName = e.target.value.trim();
   if (!newName || newName === currentPage || pages[newName]) {
+    if (newName && newName !== currentPage && pages[newName]) flashStatus('⚠ 同名ページが既にあります');
     // 未命名ページは空(プレースホルダー)に戻す。命名済みは元の名前を表示
     e.target.value = pages[currentPage].untitled ? '' : currentPage;
     return;
   }
   const wasRoot = currentPage === rootName;
+  const oldName = currentPage;
   pages[newName] = pages[currentPage];
   delete pages[newName].untitled; // 正式名が付いたので未命名フラグを解除
   delete pages[currentPage];
@@ -2046,6 +2102,7 @@ document.getElementById('pageTitle').addEventListener('change', (e) => {
   });
   currentPage = newName;
   if (wasRoot) { rootName = newName; localStorage.setItem('wikiRoot', rootName); } // ルートをリネームしたら追跡名も更新
+  renameHousekeeping(oldName, newName);
   persist();
   renderTree();
 });
@@ -2106,11 +2163,12 @@ document.addEventListener('keydown', e => {
 });
 
 // ── INIT ──────────────────────────────────────────────
-document.getElementById('ddDeleteBtn').onclick = () => {
+document.getElementById('ddDeleteBtn').onclick = async () => {
   const name = ddTargetPage;
   closePageMenu();
   if (!name || name === rootName) return;
-  deletePage(name);
+  const ok = await showConfirm(`「${name}」を削除しますか？`); // モバイル側と同様に確認を挟む（ごみ箱行きだが誤操作防止）
+  if (ok) deletePage(name);
 };
 
 document.addEventListener('click', (e) => {
@@ -2143,7 +2201,10 @@ updateTrashCount();
   });
 })();
 
-window.addEventListener('beforeunload', saveCurrent);
+window.addEventListener('beforeunload', () => {
+  saveCurrent();
+  ghUnloadPush(); // デバウンス待ちの編集をGitHubへも送る（従来はlocalStorageのみで他PCに届かなかった）
+});
 
 // ════════════════════════════════════════════════════════
 //  GitHub 同期エンジン（非公開リポジトリの data.json を Contents API で読み書き）
@@ -2152,11 +2213,24 @@ const GH = {
   cfg: JSON.parse(localStorage.getItem('wikiGhCfg') || 'null') || { owner: '', repo: '', path: 'data.json', branch: 'main' },
   token: localStorage.getItem('wikiGhToken') || '',
   sha: null,            // 現在のリモートファイル sha（楽観ロック用）
-  lastSyncedCore: null, // 最後にリモートと一致していた {rootName,pages} の文字列
+  // 最後にリモートと一致していた {rootName,pages} のハッシュ。localStorage に永続化し、
+  // 起動を跨いでも「前回push漏れのローカル編集」を検出できるようにする（nullだと無条件リモート採用になり編集消失）
+  lastSyncedHash: localStorage.getItem('wikiGhSyncHash'),
   pushTimer: null,
   pulling: false,
   pushing: false,
 };
+
+// FNV-1a 32bit + 長さ。同期済み判定の等値比較にのみ使う（localStorage節約のため本文全文は保持しない）
+function coreHash(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return str.length + ':' + h.toString(16);
+}
+function setSyncedHash(h) {
+  GH.lastSyncedHash = h;
+  try { localStorage.setItem('wikiGhSyncHash', h); } catch (e) {}
+}
 
 function ghConfigured() { return !!(GH.token && GH.cfg.owner && GH.cfg.repo); }
 function ghHeaders() {
@@ -2218,6 +2292,9 @@ function applyRemote(remote) {
 async function ghPull(opts = {}) {
   if (!ghConfigured() || GH.pulling || GH.pushing) return;
   GH.pulling = true;
+  // デバウンス中の入力をpagesへ反映してから比較する。
+  // これをしないと入力直後のpullで「ローカル未変更」と誤判定→リモート採用でタイプ内容が消える
+  if (editorLoaded && pages[currentPage]) pages[currentPage].content = document.getElementById('editor').innerHTML;
   setSync('syncing', '↓ 取得中…');
   try {
     const res = await fetch(ghUrl() + `?ref=${encodeURIComponent(GH.cfg.branch)}&_=${Date.now()}`, { headers: ghHeaders(), cache: 'no-store' });
@@ -2228,17 +2305,28 @@ async function ghPull(opts = {}) {
     if (!res.ok) { setSync('error', '⚠ 取得失敗 ' + res.status); GH.pulling = false; return; }
     const j = await res.json();
     GH.sha = j.sha;
-    const remote = JSON.parse(b64ToUtf8(j.content));
+    let text;
+    if (j.content) {
+      text = b64ToUtf8(j.content);
+    } else {
+      // Contents APIのJSON応答は1MB超のファイルで content が空(encoding:'none')になる → rawで再取得
+      const rawRes = await fetch(ghUrl() + `?ref=${encodeURIComponent(GH.cfg.branch)}&_=${Date.now()}`, {
+        headers: { ...ghHeaders(), 'Accept': 'application/vnd.github.raw+json' }, cache: 'no-store'
+      });
+      if (!rawRes.ok) { setSync('error', '⚠ 取得失敗 ' + rawRes.status); GH.pulling = false; return; }
+      text = await rawRes.text();
+    }
+    const remote = JSON.parse(text);
     const remoteCore = JSON.stringify({ rootName: remote.rootName, pages: remote.pages });
     const localCore = coreString();
     if (remoteCore === localCore) {
-      GH.lastSyncedCore = remoteCore; markSynced();
-    } else if (localCore === GH.lastSyncedCore || GH.lastSyncedCore === null) {
+      setSyncedHash(coreHash(localCore)); markSynced();
+    } else if (coreHash(localCore) === GH.lastSyncedHash || GH.lastSyncedHash === null) {
       // ローカルは前回同期から未変更 → リモートを採用
       applyRemote(remote);
-      GH.lastSyncedCore = JSON.stringify({ rootName, pages });
+      setSyncedHash(coreHash(coreString()));
       markSynced();
-    } else if (remoteCore === GH.lastSyncedCore) {
+    } else if (coreHash(remoteCore) === GH.lastSyncedHash) {
       // リモートは未変更・ローカルに編集あり → push に任せる
       ghPush();
     } else {
@@ -2247,7 +2335,7 @@ async function ghPull(opts = {}) {
         '⚠ 競合: このPCと他端末の両方でWikiが編集されています。\n\n' +
         '［OK］このPCの内容でサーバーを上書き\n［キャンセル］サーバーの最新を取得（このPCの未同期の変更は失われます）');
       if (keepLocal) { GH.pulling = false; ghPush(true); return; }
-      else { applyRemote(remote); GH.lastSyncedCore = JSON.stringify({ rootName, pages }); markSynced(); }
+      else { applyRemote(remote); setSyncedHash(coreHash(coreString())); markSynced(); }
     }
   } catch (e) {
     setSync('error', '⚠ オフライン');
@@ -2261,7 +2349,8 @@ async function ghPush(force) {
   if (!ghConfigured()) return;
   if (editorLoaded) { if (pages[currentPage]) pages[currentPage].content = document.getElementById('editor').innerHTML; }
   const core = coreString();
-  if (!force && core === GH.lastSyncedCore) { markSynced(); return; } // 変更なし
+  const coreH = coreHash(core);
+  if (!force && coreH === GH.lastSyncedHash) { markSynced(); return; } // 変更なし
   if (GH.pushing) { ghSchedulePush(); return; }
   GH.pushing = true;
   setSync('syncing', '↑ 保存中…');
@@ -2281,7 +2370,7 @@ async function ghPush(force) {
     if (!res.ok) { setSync('error', '⚠ 保存失敗 ' + res.status); GH.pushing = false; return; }
     const j = await res.json();
     GH.sha = j.content && j.content.sha ? j.content.sha : GH.sha;
-    GH.lastSyncedCore = core;
+    setSyncedHash(coreH);
     markSynced();
   } catch (e) {
     setSync('error', '⚠ オフライン（後で再同期）');
@@ -2295,6 +2384,26 @@ function ghSchedulePush() {
   clearTimeout(GH.pushTimer);
   setSync('syncing', '↑ 保存待ち…');
   GH.pushTimer = setTimeout(() => ghPush(), 1500);
+}
+
+// タブを閉じる直前の最終push（デバウンス待ちの編集を keepalive fetch で送る）。
+// 成否が確認できないため lastSyncedHash は更新しない。push成功時は次回pullの
+// remoteCore === localCore 判定で同期済み扱いになり、失敗時は通常の差分同期に乗る。
+function ghUnloadPush() {
+  if (!ghConfigured()) return;
+  const core = coreString();
+  if (coreHash(core) === GH.lastSyncedHash) return; // 未同期の変更なし
+  clearTimeout(GH.pushTimer);
+  const body = JSON.stringify({
+    message: 'wiki update (unload) ' + new Date().toISOString(),
+    content: utf8ToB64(dataString()),
+    branch: GH.cfg.branch,
+    ...(GH.sha ? { sha: GH.sha } : {}),
+  });
+  if (body.length > 60000) return; // keepalive のボディ上限(64KB)超は送れない → 次回起動時の同期に任せる
+  try {
+    fetch(ghUrl(), { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body, keepalive: true });
+  } catch (e) {}
 }
 
 function markSynced() {
@@ -2324,7 +2433,8 @@ function saveSyncSettings() {
   GH.token = document.getElementById('ghToken').value.trim();
   localStorage.setItem('wikiGhCfg', JSON.stringify(GH.cfg));
   localStorage.setItem('wikiGhToken', GH.token);
-  GH.sha = null; GH.lastSyncedCore = null;
+  GH.sha = null; GH.lastSyncedHash = null;
+  localStorage.removeItem('wikiGhSyncHash');
   closeSyncSettings();
   if (ghConfigured()) ghPull(); else setSync('', '⚙ 同期未設定');
 }
