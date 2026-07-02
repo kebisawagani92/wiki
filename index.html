@@ -1619,10 +1619,8 @@ function renderTrashList() {
     btn.onclick = () => restorePage(+btn.dataset.idx);
   });
   list.querySelectorAll('.trash-del-btn').forEach(btn => {
-    btn.onclick = async () => {
-      const ok = await showConfirm(`「${trash[+btn.dataset.idx].root}」を完全に削除しますか？`);
-      if (ok) permanentDelete(+btn.dataset.idx);
-    };
+    // ごみ箱行きの時点で既にワンクッションあるため、個別の完全削除は確認なしのワンクリック
+    btn.onclick = () => permanentDelete(+btn.dataset.idx);
   });
 }
 
