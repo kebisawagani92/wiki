@@ -34,8 +34,8 @@
   function load(){
     var t=token();
     if(!t){ showSetup(''); return; }
-    var url='https://api.github.com/repos/'+SRC.owner+'/'+SRC.repo+'/contents/'+SRC.path+'?ref='+SRC.branch;
-    fetch(url,{headers:{Authorization:'Bearer '+t, Accept:'application/vnd.github.raw+json'}})
+    var url='https://api.github.com/repos/'+SRC.owner+'/'+SRC.repo+'/contents/'+SRC.path+'?ref='+SRC.branch+'&_='+Date.now();
+    fetch(url,{cache:'no-store', headers:{Authorization:'Bearer '+t, Accept:'application/vnd.github.raw+json', 'If-None-Match':''}})
       .then(function(res){
         if(!res.ok) throw new Error('HTTP '+res.status+(res.status===401?'（トークン無効）':res.status===404?'（権限不足 or ファイルなし）':''));
         return res.text();
