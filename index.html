@@ -2023,6 +2023,29 @@ document.getElementById('editor').addEventListener('blur', () => {
   savedEditorRange = sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null;
 });
 
+function handleEditorCopy(e, isCut) {
+  const sel = window.getSelection();
+  if (!sel.rangeCount || sel.isCollapsed) return;
+  const range = sel.getRangeAt(0);
+  const wrap = document.createElement('div');
+  wrap.appendChild(range.cloneContents());
+  // ダークテーマの背景色・文字色は編集画面固有の見た目なので、
+  // コピー先(Gmail等)に持ち込まないよう外側コンテナのstyleは持たせない。
+  // ユーザーがツールバーで指定した文字色(inline style)は子要素にそのまま残るので保持される。
+  wrap.removeAttribute('style');
+  const html = wrap.innerHTML;
+  const text = sel.toString();
+  e.clipboardData.setData('text/plain', text);
+  e.clipboardData.setData('text/html', html);
+  e.preventDefault();
+  if (isCut) {
+    range.deleteContents();
+    scheduleSave();
+  }
+}
+document.getElementById('editor').addEventListener('copy', (e) => handleEditorCopy(e, false));
+document.getElementById('editor').addEventListener('cut', (e) => handleEditorCopy(e, true));
+
 document.getElementById('editor').addEventListener('paste', (e) => {
   e.preventDefault();
 
