@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTC Cycle Chart</title>
+<style>
+  body{margin:0; background:#1e1e1c; color:#ececea; font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif; line-height:1.7;}
+  .box{max-width:480px; margin:18vh auto 0; padding:28px 26px; background:#2a2a27; border-radius:10px;}
+  h1{font-size:17px; font-weight:600; margin:0 0 10px;}
+  p{font-size:13px; color:#b4b2a9; margin:6px 0;}
+  input{width:100%; padding:9px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:#1e1e1c; color:#ececea; font-size:13px; box-sizing:border-box;}
+  button{margin-top:12px; padding:9px 18px; border:none; border-radius:6px; background:#5DCAA5; color:#1a1a18; font-weight:600; font-size:13px; cursor:pointer;}
+  .err{color:#F09595; font-size:12.5px; min-height:1em;}
+  .muted{font-size:11.5px; color:#888780;}
+</style>
+</head>
+<body>
+<div class="box" id="setup" hidden>
+  <h1>BTC Cycle Chart ― アクセス設定</h1>
+  <p>データ用リポジトリの読み取りトークン（fine-grained PAT）を入力してください。Wikiで設定済みのトークンがあれば自動で使用されます。</p>
+  <input type="password" id="tok" placeholder="github_pat_...">
+  <button id="go">保存して表示</button>
+  <p class="err" id="err"></p>
+  <p class="muted">トークンはこのブラウザのlocalStorageにのみ保存されます。</p>
+</div>
+<div class="box" id="loading"><h1>読み込み中…</h1></div>
+<script>
+(function(){
+  var SRC={owner:'kebisawagani92', repo:'wiki-data', branch:'main', main:'btc/chart.html'};
+  var el=function(id){return document.getElementById(id);};
+  function token(){ return localStorage.getItem('cfGhToken') || localStorage.getItem('wikiGhToken') || ''; }
+  function showSetup(msg){ el('loading').hidden=true; el('setup').hidden=false; el('err').textContent=msg||''; }
+  function gh(path,t){
+    return fetch('https://api.github.com/repos/'+SRC.owner+'/'+SRC.repo+'/contents/'+path+'?ref='+SRC.branch,
+      {headers:{Authorization:'Bearer '+t, Accept:'application/vnd.github.raw+json'}, cache:'no-store'});
+  }
+  function load(){
+    var t=token();
+    if(!t){ showSetup(''); return; }
+    gh(SRC.main,t).then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status+(res.status===401?'（トークン無効）':res.status===404?'（権限不足 or ファイルなし）':''));
+      return res.text();
+    }).then(function(html){
+      document.open(); document.write(html); document.close();
+    }).catch(function(e){ showSetup('読み込み失敗: '+e.message); });
+  }
+  el('go').addEventListener('click',function(){
+    var v=el('tok').value.trim();
+    if(!v){ el('err').textContent='トークンを入力してください'; return; }
+    localStorage.setItem('cfGhToken',v);
+    el('setup').hidden=true; el('loading').hidden=false; load();
+  });
+  load();
+})();
+</script>
+</body>
+</html>
