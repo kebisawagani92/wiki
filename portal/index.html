@@ -51,9 +51,6 @@
   .card .path{ font-size:.82rem; color:var(--accent2); margin-top:2px;
     font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; }
   @media (prefers-color-scheme: dark){ .card .path{ color:var(--accent); } }
-  .card .arrow{ margin-left:auto; color:var(--sub); font-size:1.3rem; flex-shrink:0;
-    transition:transform .16s ease, color .16s ease; }
-  a.card:hover .arrow{ transform:translateX(3px); color:var(--accent); }
 </style>
 </head>
 <body>
@@ -64,47 +61,33 @@
   <div class="grid">
     <a class="card" href="../kabu/">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 16 9 10 13 14 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>
-      <span class="txt"><div class="name">株価ダッシュボード</div><div class="path">/kabu/</div></span>
-      <span class="arrow">→</span>
-    </a>
+      <span class="txt"><div class="name">株価ダッシュボード</div><div class="path">/kabu/</div></span>    </a>
     <a class="card" href="../fx/">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 2 21 6 17 10"/><path d="M3 12V10a4 4 0 0 1 4-4h14"/><polyline points="7 22 3 18 7 14"/><path d="M21 12v2a4 4 0 0 1-4 4H3"/></svg></span>
-      <span class="txt"><div class="name">為替ダッシュボード</div><div class="path">/fx/</div></span>
-      <span class="arrow">→</span>
-    </a>
+      <span class="txt"><div class="name">為替ダッシュボード</div><div class="path">/fx/</div></span>    </a>
     <a class="card" href="../btc/">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4zm0 4h4.3a2 2 0 0 1 0 4H9.5zm0-4V6.5m0 11V16m2.5-9.5V8m0 8v1.5"/></svg></span>
-      <span class="txt"><div class="name">BTCサイクルチャート</div><div class="path">/btc/</div></span>
-      <span class="arrow">→</span>
-    </a>
+      <span class="txt"><div class="name">BTCサイクルチャート</div><div class="path">/btc/</div></span>    </a>
   </div>
 
   <div class="sec">会社情報</div>
   <div class="grid">
     <a class="card" href="../cf/">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="20" y2="21"/><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="6" width="4" height="13" rx="1"/><rect x="16" y="9" width="4" height="10" rx="1"/></svg></span>
-      <span class="txt"><div class="name">キャッシュフロー予測</div><div class="path">/cf/</div></span>
-      <span class="arrow">→</span>
-    </a>
+      <span class="txt"><div class="name">キャッシュフロー予測</div><div class="path">/cf/</div></span>    </a>
     <a class="card" href="../divtool/">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></span>
-      <span class="txt"><div class="name">配当計算ツール</div><div class="path">/divtool/</div></span>
-      <span class="arrow">→</span>
-    </a>
+      <span class="txt"><div class="name">配当計算ツール</div><div class="path">/divtool/</div></span>    </a>
   </div>
 
   <div class="sec">ツール・記録</div>
   <div class="grid">
     <a class="card" href="../">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
-      <span class="txt"><div class="name">Wiki</div><div class="path">/</div></span>
-      <span class="arrow">→</span>
-    </a>
+      <span class="txt"><div class="name">Wiki</div><div class="path">/</div></span>    </a>
     <a class="card" href="../ryotei/">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="3" y1="13" x2="21" y2="13"/><line x1="12" y1="11" x2="12" y2="15"/></svg></span>
-      <span class="txt"><div class="name">旅程表</div><div class="path">/ryotei/</div></span>
-      <span class="arrow">→</span>
-    </a>
+      <span class="txt"><div class="name">旅程表</div><div class="path">/ryotei/</div></span>    </a>
   </div>
 </div>
 </body>
