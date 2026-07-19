@@ -6,39 +6,54 @@
 <title>ダッシュボード ポータル</title>
 <style>
   :root{
-    --bg:#1e1e1c; --card:#2a2a27; --card-h:#332f2b; --text:#ececea; --sub:#a8a49b;
-    --line:#3a3833; --accent:#5DCAA5; --accent-d:#7fd8bb;
+    --bg:#1a1a18; --card:#2c2c28; --card2:#242420; --text:#ececea; --sub:#a8a49b;
+    --line:#3a3833; --accent:#5DCAA5; --accent2:#3f9d7f;
+    --sh1:rgba(0,0,0,.35); --sh2:rgba(0,0,0,.45); --hi:rgba(255,255,255,.045);
   }
   @media (prefers-color-scheme: light){
-    :root{ --bg:#f4f5f3; --card:#ffffff; --card-h:#f0f1ee; --text:#1f2320; --sub:#6b6f68;
-      --line:#e2e3df; --accent:#2f9d7f; --accent-d:#268067; }
+    :root{ --bg:#eef0ed; --card:#ffffff; --card2:#f5f6f3; --text:#1f2320; --sub:#6b6f68;
+      --line:#e2e3df; --accent:#2f9d7f; --accent2:#20876a;
+      --sh1:rgba(30,40,35,.10); --sh2:rgba(30,40,35,.14); --hi:rgba(255,255,255,.7); }
   }
   *{ box-sizing:border-box; }
   body{ background:var(--bg); color:var(--text); margin:0; padding:40px 32px 56px;
     font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP","Meiryo",sans-serif;
     line-height:1.5; -webkit-text-size-adjust:100%; }
   .wrap{ max-width:1320px; margin:0 auto; }
-  h1{ font-size:2.1rem; margin:0 0 28px; letter-spacing:.02em; text-align:center; }
+  h1{ font-size:1.8rem; margin:0 0 30px; letter-spacing:.02em; text-align:center; }
 
-  .sec{ font-size:1rem; font-weight:700; color:var(--sub); letter-spacing:.06em;
-    margin:34px 4px 16px; }
+  .sec{ font-size:.9rem; font-weight:700; color:var(--sub); letter-spacing:.06em;
+    margin:32px 4px 15px; }
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
   @media (max-width:900px){ .grid{ grid-template-columns:repeat(2,1fr); } }
   @media (max-width:600px){ .grid{ grid-template-columns:1fr; } }
 
-  a.card{ display:flex; align-items:center; gap:18px; text-decoration:none; color:inherit;
-    background:var(--card); border:1px solid var(--line); border-radius:18px; padding:26px 26px;
-    transition:transform .12s ease, border-color .12s ease, background .12s ease; }
-  a.card:hover{ transform:translateY(-3px); border-color:var(--accent); background:var(--card-h); }
+  a.card{ display:flex; align-items:center; gap:16px; text-decoration:none; color:inherit;
+    background:linear-gradient(168deg, var(--card) 0%, var(--card2) 100%);
+    border:1px solid var(--line); border-radius:18px; padding:22px 24px;
+    box-shadow:0 1px 2px var(--sh1), 0 6px 16px var(--sh1), inset 0 1px 0 var(--hi);
+    transition:transform .16s cubic-bezier(.2,.7,.3,1), box-shadow .16s ease, border-color .16s ease; }
+  a.card:hover{ transform:translateY(-5px);
+    box-shadow:0 10px 20px var(--sh2), 0 20px 38px var(--sh2), inset 0 1px 0 var(--hi);
+    border-color:var(--accent); }
+  a.card:active{ transform:translateY(-1px);
+    box-shadow:0 2px 6px var(--sh2), inset 0 1px 0 var(--hi); }
   a.card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-  .card .ico{ font-size:2.4rem; line-height:1; width:64px; height:64px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; border-radius:16px;
-    background:color-mix(in srgb, var(--accent) 16%, transparent); }
+
+  .card .ico{ width:54px; height:54px; flex-shrink:0; border-radius:15px;
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    background:linear-gradient(145deg, var(--accent) 0%, var(--accent2) 100%);
+    box-shadow:0 5px 12px color-mix(in srgb, var(--accent) 42%, transparent),
+      inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 4px rgba(0,0,0,.12); }
+  .card .ico svg{ width:26px; height:26px; display:block; }
   .card .txt{ min-width:0; }
-  .card .name{ font-size:1.55rem; font-weight:700; letter-spacing:.01em; }
-  .card .path{ font-size:.95rem; color:var(--accent-d); margin-top:3px;
+  .card .name{ font-size:1.28rem; font-weight:700; letter-spacing:.01em; }
+  .card .path{ font-size:.82rem; color:var(--accent2); margin-top:2px;
     font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; }
-  .card .arrow{ margin-left:auto; color:var(--sub); font-size:1.6rem; flex-shrink:0; }
+  @media (prefers-color-scheme: dark){ .card .path{ color:var(--accent); } }
+  .card .arrow{ margin-left:auto; color:var(--sub); font-size:1.3rem; flex-shrink:0;
+    transition:transform .16s ease, color .16s ease; }
+  a.card:hover .arrow{ transform:translateX(3px); color:var(--accent); }
 </style>
 </head>
 <body>
@@ -48,17 +63,17 @@
   <div class="sec">投資・マーケット</div>
   <div class="grid">
     <a class="card" href="../kabu/">
-      <span class="ico">📈</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 16 9 10 13 14 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>
       <span class="txt"><div class="name">株価ダッシュボード</div><div class="path">/kabu/</div></span>
       <span class="arrow">→</span>
     </a>
     <a class="card" href="../fx/">
-      <span class="ico">💱</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 2 21 6 17 10"/><path d="M3 12V10a4 4 0 0 1 4-4h14"/><polyline points="7 22 3 18 7 14"/><path d="M21 12v2a4 4 0 0 1-4 4H3"/></svg></span>
       <span class="txt"><div class="name">為替ダッシュボード</div><div class="path">/fx/</div></span>
       <span class="arrow">→</span>
     </a>
     <a class="card" href="../btc/">
-      <span class="ico">₿</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4zm0 4h4.3a2 2 0 0 1 0 4H9.5zm0-4V6.5m0 11V16m2.5-9.5V8m0 8v1.5"/></svg></span>
       <span class="txt"><div class="name">BTCサイクルチャート</div><div class="path">/btc/</div></span>
       <span class="arrow">→</span>
     </a>
@@ -67,12 +82,12 @@
   <div class="sec">会社情報</div>
   <div class="grid">
     <a class="card" href="../cf/">
-      <span class="ico">📊</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="20" y2="21"/><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="6" width="4" height="13" rx="1"/><rect x="16" y="9" width="4" height="10" rx="1"/></svg></span>
       <span class="txt"><div class="name">キャッシュフロー予測</div><div class="path">/cf/</div></span>
       <span class="arrow">→</span>
     </a>
     <a class="card" href="../divtool/">
-      <span class="ico">💰</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></span>
       <span class="txt"><div class="name">配当計算ツール</div><div class="path">/divtool/</div></span>
       <span class="arrow">→</span>
     </a>
@@ -81,12 +96,12 @@
   <div class="sec">ツール・記録</div>
   <div class="grid">
     <a class="card" href="../">
-      <span class="ico">📝</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
       <span class="txt"><div class="name">Wiki</div><div class="path">/</div></span>
       <span class="arrow">→</span>
     </a>
     <a class="card" href="../ryotei/">
-      <span class="ico">🧳</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="3" y1="13" x2="21" y2="13"/><line x1="12" y1="11" x2="12" y2="15"/></svg></span>
       <span class="txt"><div class="name">旅程表</div><div class="path">/ryotei/</div></span>
       <span class="arrow">→</span>
     </a>
