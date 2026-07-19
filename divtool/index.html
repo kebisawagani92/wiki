@@ -52,6 +52,7 @@
           function(){ return '<script>\n'+reit.replace(/^﻿/,'')+'\n<\/script>'; });
       }
       document.open(); document.write(html); document.close();
+      try{var _pl=document.createElement('a');_pl.href='../portal/';_pl.textContent='≡ ポータル';_pl.setAttribute('style','position:fixed;left:12px;bottom:12px;z-index:2147483000;font:600 12px sans-serif;color:#fff;background:rgba(47,157,127,.92);padding:7px 12px;border-radius:999px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.3)');document.body.appendChild(_pl);}catch(e){}
     }).catch(function(e){ showSetup('読み込み失敗: '+e.message); });
   }
   el('go').addEventListener('click',function(){
