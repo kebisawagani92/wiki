@@ -111,7 +111,7 @@
   </div>
   <div class="grid" id="grid"></div>
   <div class="list">
-    <h2>旅程一覧</h2>
+    <h2 id="listTitle">旅程一覧</h2>
     <div id="tripList"></div>
   </div>
 </div>
@@ -184,13 +184,20 @@
       }
       g.appendChild(c);
     }
+    renderList();
   }
 
   function renderList(){
     var box=el('tripList'); box.innerHTML='';
-    if(!trips.length){ box.innerHTML='<div class="empty">まだ旅程がありません。</div>'; return; }
-    var sorted=trips.slice().sort(function(a,b){ return b.start<a.start?-1:b.start>a.start?1:0; });
-    sorted.forEach(function(tr){
+    var title=el('listTitle'); if(title) title.textContent=(viewM+1)+'月の旅程';
+    // この表示月に重なる旅程だけ抽出
+    var mStart=new Date(viewY,viewM,1), mEnd=new Date(viewY,viewM+1,0);
+    var inMonth=trips.filter(function(tr){
+      var s=parseYMD(tr.start), e=parseYMD(tr.end||tr.start);
+      return s<=mEnd && e>=mStart;
+    }).sort(function(a,b){ return a.start<b.start?-1:a.start>b.start?1:0; });
+    if(!inMonth.length){ box.innerHTML='<div class="empty">この月の旅程はありません。</div>'; return; }
+    inMonth.forEach(function(tr){
       var s=parseYMD(tr.start);
       var row=document.createElement('button'); row.className='trip';
       var range=tr.end&&tr.end!==tr.start ? (s.getMonth()+1)+'/'+s.getDate()+'–'+(parseYMD(tr.end).getMonth()+1)+'/'+parseYMD(tr.end).getDate() : '';
@@ -233,7 +240,7 @@
         var focus=new Date();
         if(trips.length){ var latest=trips.map(function(t){return t.start;}).sort()[trips.length-1]; focus=parseYMD(latest); }
         viewY=focus.getFullYear(); viewM=focus.getMonth();
-        renderCalendar(); renderList();
+        renderCalendar();
         el('loading').hidden=true; el('setup').hidden=true; el('app').hidden=false;
         addPortalPill();
       })
