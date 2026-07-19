@@ -7,107 +7,88 @@
 <style>
   :root{
     --bg:#1e1e1c; --card:#2a2a27; --card-h:#332f2b; --text:#ececea; --sub:#a8a49b;
-    --line:#3a3833; --accent:#5DCAA5; --accent-d:#3f9d7f;
+    --line:#3a3833; --accent:#5DCAA5; --accent-d:#7fd8bb;
   }
   @media (prefers-color-scheme: light){
     :root{ --bg:#f4f5f3; --card:#ffffff; --card-h:#f0f1ee; --text:#1f2320; --sub:#6b6f68;
       --line:#e2e3df; --accent:#2f9d7f; --accent-d:#268067; }
   }
   *{ box-sizing:border-box; }
-  body{ background:var(--bg); color:var(--text); margin:0; padding:32px 20px 48px;
+  body{ background:var(--bg); color:var(--text); margin:0; padding:40px 32px 56px;
     font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP","Meiryo",sans-serif;
-    line-height:1.6; -webkit-text-size-adjust:100%; }
-  .wrap{ max-width:1000px; margin:0 auto; }
-  header{ margin-bottom:8px; }
-  h1{ font-size:1.5rem; margin:0 0 4px; letter-spacing:.02em; }
-  .lead{ color:var(--sub); font-size:.9rem; margin:0 0 26px; }
+    line-height:1.5; -webkit-text-size-adjust:100%; }
+  .wrap{ max-width:1800px; margin:0 auto; }
+  h1{ font-size:2.1rem; margin:0 0 28px; letter-spacing:.02em; }
 
-  .sec{ font-size:.78rem; font-weight:700; color:var(--sub); letter-spacing:.08em;
-    text-transform:uppercase; margin:26px 4px 12px; }
-  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+  .sec{ font-size:1rem; font-weight:700; color:var(--sub); letter-spacing:.06em;
+    margin:34px 4px 16px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px; }
 
-  a.card{ display:flex; flex-direction:column; gap:6px; text-decoration:none; color:inherit;
-    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 16px 15px;
+  a.card{ display:flex; align-items:center; gap:18px; text-decoration:none; color:inherit;
+    background:var(--card); border:1px solid var(--line); border-radius:18px; padding:26px 26px;
     transition:transform .12s ease, border-color .12s ease, background .12s ease; }
-  a.card:hover{ transform:translateY(-2px); border-color:var(--accent); background:var(--card-h); }
+  a.card:hover{ transform:translateY(-3px); border-color:var(--accent); background:var(--card-h); }
   a.card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-  .card .top{ display:flex; align-items:center; gap:10px; }
-  .card .ico{ font-size:1.5rem; line-height:1; width:38px; height:38px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; border-radius:10px;
+  .card .ico{ font-size:2.4rem; line-height:1; width:64px; height:64px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; border-radius:16px;
     background:color-mix(in srgb, var(--accent) 16%, transparent); }
-  .card .name{ font-size:1.02rem; font-weight:700; }
-  .card .path{ font-size:.72rem; color:var(--accent-d); font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; }
-  .card .desc{ font-size:.82rem; color:var(--sub); margin-top:2px; }
-  .card .arrow{ margin-left:auto; color:var(--sub); font-size:1rem; }
-
-  footer{ color:var(--sub); font-size:.72rem; margin-top:34px; text-align:center; }
-  footer .note{ opacity:.8; }
+  .card .txt{ min-width:0; }
+  .card .name{ font-size:1.55rem; font-weight:700; letter-spacing:.01em; }
+  .card .path{ font-size:.95rem; color:var(--accent-d); margin-top:3px;
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; }
+  .card .arrow{ margin-left:auto; color:var(--sub); font-size:1.6rem; flex-shrink:0; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>ダッシュボード ポータル</h1>
-    <p class="lead">自作ツールの入口。各ツールはWiki設定済みのブラウザでそのまま開けます。</p>
-  </header>
+  <h1>ダッシュボード ポータル</h1>
 
   <div class="sec">投資・マーケット</div>
   <div class="grid">
     <a class="card" href="../kabu/">
-      <div class="top"><span class="ico">📈</span>
-        <div><div class="name">株価ダッシュボード</div><div class="path">/kabu/</div></div>
-        <span class="arrow">→</span></div>
-      <div class="desc">保有銘柄の株価・理論株価・目標株価・決算スケジュール・ニュース。毎営業日自動更新。</div>
+      <span class="ico">📈</span>
+      <span class="txt"><div class="name">株価ダッシュボード</div><div class="path">/kabu/</div></span>
+      <span class="arrow">→</span>
     </a>
     <a class="card" href="../fx/">
-      <div class="top"><span class="ico">💱</span>
-        <div><div class="name">為替ダッシュボード</div><div class="path">/fx/</div></div>
-        <span class="arrow">→</span></div>
-      <div class="desc">USD/JPY・ZAR/JPY のレート、25日/75日移動平均、年初来・2年高安。</div>
+      <span class="ico">💱</span>
+      <span class="txt"><div class="name">為替ダッシュボード</div><div class="path">/fx/</div></span>
+      <span class="arrow">→</span>
     </a>
     <a class="card" href="../btc/">
-      <div class="top"><span class="ico">₿</span>
-        <div><div class="name">BTCサイクルチャート</div><div class="path">/btc/</div></div>
-        <span class="arrow">→</span></div>
-      <div class="desc">ビットコイン4年サイクル。半減期・最高値・大底・2030年までの予測。</div>
+      <span class="ico">₿</span>
+      <span class="txt"><div class="name">BTCサイクルチャート</div><div class="path">/btc/</div></span>
+      <span class="arrow">→</span>
     </a>
     <a class="card" href="../divtool/">
-      <div class="top"><span class="ico">💰</span>
-        <div><div class="name">配当計算ツール</div><div class="path">/divtool/</div></div>
-        <span class="arrow">→</span></div>
-      <div class="desc">配当金・分配金の計算と月次記録。REITデータは自動更新。</div>
+      <span class="ico">💰</span>
+      <span class="txt"><div class="name">配当計算ツール</div><div class="path">/divtool/</div></span>
+      <span class="arrow">→</span>
     </a>
   </div>
 
   <div class="sec">会計・資金</div>
   <div class="grid">
     <a class="card" href="../cf/">
-      <div class="top"><span class="ico">📊</span>
-        <div><div class="name">キャッシュフロー予測</div><div class="path">/cf/</div></div>
-        <span class="arrow">→</span></div>
-      <div class="desc">MFの現預金推移から期末キャッシュフローを予測するダッシュボード。</div>
+      <span class="ico">📊</span>
+      <span class="txt"><div class="name">キャッシュフロー予測</div><div class="path">/cf/</div></span>
+      <span class="arrow">→</span>
     </a>
   </div>
 
   <div class="sec">ツール・記録</div>
   <div class="grid">
     <a class="card" href="../">
-      <div class="top"><span class="ico">📝</span>
-        <div><div class="name">Wiki</div><div class="path">/</div></div>
-        <span class="arrow">→</span></div>
-      <div class="desc">自動保存Wikiエディタ。階層リスト・全文検索・2台のPCで同期。</div>
+      <span class="ico">📝</span>
+      <span class="txt"><div class="name">Wiki</div><div class="path">/</div></span>
+      <span class="arrow">→</span>
     </a>
     <a class="card" href="../ryotei/">
-      <div class="top"><span class="ico">🧳</span>
-        <div><div class="name">旅程表</div><div class="path">/ryotei/</div></div>
-        <span class="arrow">→</span></div>
-      <div class="desc">新幹線・宿泊・レストラン予約をまとめたモバイル向け旅程表（最新分）。</div>
+      <span class="ico">🧳</span>
+      <span class="txt"><div class="name">旅程表</div><div class="path">/ryotei/</div></span>
+      <span class="arrow">→</span>
     </a>
   </div>
-
-  <footer>
-    <div class="note">個人ツール。データは各自のGitHubトークンでのみ読み込まれます。</div>
-  </footer>
 </div>
 </body>
 </html>
