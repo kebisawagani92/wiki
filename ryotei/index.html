@@ -33,7 +33,7 @@
     width:40px;height:40px;border-radius:12px;font-size:19px;cursor:pointer;line-height:1;}
   .calnav button:active{background:var(--accent-soft);}
 
-  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;}
   .dow{text-align:center;font-size:12px;font-weight:700;color:var(--sub);padding:4px 0;}
   .dow.sun{color:#e05656;} .dow.sat{color:#4a86e0;}
   .cell{aspect-ratio:1/1;border-radius:12px;display:flex;flex-direction:column;
