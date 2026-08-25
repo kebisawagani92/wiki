@@ -7,16 +7,16 @@
 <style>
   :root{
     --bg:#f4f6f9; --card:#ffffff; --ink:#1a2230; --sub:#5b6675;
-    --line:#e3e8ef; --accent:#0b6cbf; --accent-soft:#e8f2fb; --today:#c2410c;
+    --line:#e3e8ef; --accent:#0b6cbf; --accent-soft:#e8f2fb; --today:#c2410c; --past:#b6bec8;
   }
   @media (prefers-color-scheme: dark){
     :root{--bg:#0f141b; --card:#182029; --ink:#e8edf3; --sub:#9aa7b6;
-      --line:#28323d; --accent:#4aa3e8; --accent-soft:#12283b; --today:#fb923c;}
+      --line:#28323d; --accent:#4aa3e8; --accent-soft:#12283b; --today:#fb923c; --past:#4a5561;}
   }
   :root[data-theme="light"]{--bg:#f4f6f9; --card:#ffffff; --ink:#1a2230; --sub:#5b6675;
-    --line:#e3e8ef; --accent:#0b6cbf; --accent-soft:#e8f2fb; --today:#c2410c;}
+    --line:#e3e8ef; --accent:#0b6cbf; --accent-soft:#e8f2fb; --today:#c2410c; --past:#b6bec8;}
   :root[data-theme="dark"]{--bg:#0f141b; --card:#182029; --ink:#e8edf3; --sub:#9aa7b6;
-    --line:#28323d; --accent:#4aa3e8; --accent-soft:#12283b; --today:#fb923c;}
+    --line:#28323d; --accent:#4aa3e8; --accent-soft:#12283b; --today:#fb923c; --past:#4a5561;}
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{background:var(--bg);color:var(--ink);
@@ -48,6 +48,7 @@
   .cell.trip.rangestart{border-top-right-radius:4px;border-bottom-right-radius:4px;}
   .cell.trip.rangemid{border-radius:4px;}
   .cell.trip.rangeend{border-top-left-radius:4px;border-bottom-left-radius:4px;}
+  .cell.trip.past{background:var(--past);}
   .cell .dot{position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.9;}
 
   .list{margin-top:22px;}
@@ -62,6 +63,8 @@
   .trip .info{flex:1 1 auto;min-width:0;}
   .trip .info .t{font-size:16px;font-weight:700;line-height:1.35;}
   .trip .info .r{font-size:12.5px;color:var(--sub);margin-top:2px;}
+  .trip.past{opacity:.6;}
+  .trip.past .date .d,.trip.past .info .t{color:var(--sub);font-weight:600;}
   .trip .arw{flex:0 0 auto;color:var(--sub);font-size:18px;}
   .empty{color:var(--sub);font-size:14px;padding:8px 2px;}
 
@@ -176,6 +179,7 @@
       var tr=tripByDate[key];
       if(tr){
         c.className+=' trip';
+        if(isPast(tr)) c.className+=' past';
         var isStart=(key===tr.start), isEnd=(key===(tr.end||tr.start));
         if(isStart&&isEnd){} else if(isStart){ c.className+=' rangestart'; }
         else if(isEnd){ c.className+=' rangeend'; } else { c.className+=' rangemid'; }
@@ -185,6 +189,12 @@
       g.appendChild(c);
     }
     renderList();
+  }
+
+  // 終了日が今日より前なら「過去の旅程」
+  function isPast(tr){
+    var t=new Date(); t.setHours(0,0,0,0);
+    return parseYMD(tr.end||tr.start) < t;
   }
 
   function renderList(){
@@ -199,7 +209,7 @@
     if(!inMonth.length){ box.innerHTML='<div class="empty">この月の旅程はありません。</div>'; return; }
     inMonth.forEach(function(tr){
       var s=parseYMD(tr.start);
-      var row=document.createElement('button'); row.className='trip';
+      var row=document.createElement('button'); row.className='trip'+(isPast(tr)?' past':'');
       var range=tr.end&&tr.end!==tr.start ? (s.getMonth()+1)+'/'+s.getDate()+'–'+(parseYMD(tr.end).getMonth()+1)+'/'+parseYMD(tr.end).getDate() : '';
       row.innerHTML='<div class="date"><div class="d">'+s.getDate()+'</div><div class="my">'+s.getFullYear()+'.'+(s.getMonth()+1)+'</div></div>'+
         '<div class="info"><div class="t"></div><div class="r"></div></div><div class="arw">›</div>';
