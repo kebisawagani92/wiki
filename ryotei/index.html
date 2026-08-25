@@ -236,9 +236,8 @@
         var data=JSON.parse(txt);
         trips=data.trips||[];
         buildIndex();
-        // default month = latest trip's start month, else current
+        // default month = current month (today)
         var focus=new Date();
-        if(trips.length){ var latest=trips.map(function(t){return t.start;}).sort()[trips.length-1]; focus=parseYMD(latest); }
         viewY=focus.getFullYear(); viewM=focus.getMonth();
         renderCalendar();
         el('loading').hidden=true; el('setup').hidden=true; el('app').hidden=false;
