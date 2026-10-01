@@ -27,7 +27,8 @@
 <div class="box" id="loading"><h1>読み込み中…</h1></div>
 <script>
 (function(){
-  var SRC={owner:'kebisawagani92', repo:'wiki-data', path:'cf/dashboard.html', branch:'main'};
+  var FY27=/[?&]fy=2027\b/.test(location.search);
+  var SRC={owner:'kebisawagani92', repo:'wiki-data', path:FY27?'cf/fy2027.html':'cf/dashboard.html', branch:'main'};
   var el=function(id){return document.getElementById(id);};
   function token(){ return localStorage.getItem('cfGhToken') || localStorage.getItem('wikiGhToken') || ''; }
   function showSetup(msg){ el('loading').hidden=true; el('setup').hidden=false; el('err').textContent=msg||''; }
@@ -41,7 +42,8 @@
         return res.text();
       })
       .then(function(html){ document.open(); document.write(html); document.close();
-        try{var _pl=document.createElement('a');_pl.href='../portal/';_pl.textContent='≡ ポータル';_pl.setAttribute('style','position:fixed;left:12px;bottom:12px;z-index:2147483000;font:600 12px sans-serif;color:#fff;background:rgba(47,157,127,.92);padding:7px 12px;border-radius:999px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.3)');document.body.appendChild(_pl);}catch(e){} })
+        try{var _pl=document.createElement('a');_pl.href='../portal/';_pl.textContent='≡ ポータル';_pl.setAttribute('style','position:fixed;left:12px;bottom:12px;z-index:2147483000;font:600 12px sans-serif;color:#fff;background:rgba(47,157,127,.92);padding:7px 12px;border-radius:999px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.3)');document.body.appendChild(_pl);
+          var _fy=document.createElement('a');_fy.href=FY27?'./':'./?fy=2027';_fy.textContent=FY27?'← 2026年10月期（当期）':'2027年10月期（翌期） →';_fy.setAttribute('style','position:fixed;left:120px;bottom:12px;z-index:2147483000;font:600 12px sans-serif;color:#fff;background:rgba(83,74,183,.92);padding:7px 12px;border-radius:999px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.3)');document.body.appendChild(_fy);}catch(e){} })
       .catch(function(e){ showSetup('読み込み失敗: '+e.message); });
   }
   el('go').addEventListener('click',function(){
