@@ -94,9 +94,6 @@
     <a class="card" href="../secdiag/" target="_blank" rel="noopener">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
       <span class="txt"><div class="name">セキュリティ診断</div><div class="path">/secdiag/</div></span>    </a>
-    <a class="card" href="../zokusei/" target="_blank" rel="noopener">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-      <span class="txt"><div class="name">属性DB</div><div class="path">/zokusei/</div></span>    </a>
   </div>
 
   <div class="sec">ロジック</div>
@@ -131,6 +128,13 @@
       <span class="txt"><div class="name">配当計算ツール</div><div class="path">/divtool/</div></span>    </a>
   </div>
 
+  <div class="sec" data-key="ツール（プライベート）">ツール</div>
+  <div class="grid">
+    <a class="card" href="../zokusei/" target="_blank" rel="noopener">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="txt"><div class="name">属性DB</div><div class="path">/zokusei/</div></span>    </a>
+  </div>
+
   <div class="sec">外部サービス</div>
   <div class="grid">
     <a class="card" href="https://mail.google.com/" target="_blank" rel="noopener">
@@ -149,10 +153,10 @@
 <script>
 (function(){
   // タブ：カテゴリ単位でワーク／プライベートに振り分ける
-  var TAB={'投資・マーケット':'private','外部サービス':'private','ツール':'work','ロジック':'work','会社情報':'work'}, TK='portalTab_v1';
+  var TAB={'投資・マーケット':'private','外部サービス':'private','ツール（プライベート）':'private','ツール':'work','ロジック':'work','会社情報':'work'}, TK='portalTab_v1';
   var btns=[].slice.call(document.querySelectorAll('#tabs button')), secs=[].slice.call(document.querySelectorAll('.sec'));
   function show(tab){
-    secs.forEach(function(s){ var hide=(TAB[s.textContent.trim()]||'work')!==tab; s.classList.toggle('tabhide',hide); var g=s.nextElementSibling; if(g) g.classList.toggle('tabhide',hide); });
+    secs.forEach(function(s){ var hide=(TAB[s.dataset.key||s.textContent.trim()]||'work')!==tab; s.classList.toggle('tabhide',hide); var g=s.nextElementSibling; if(g) g.classList.toggle('tabhide',hide); });
     btns.forEach(function(b){ b.classList.toggle('on', b.dataset.tab===tab); });
     try{ localStorage.setItem(TK,tab); }catch(e){}
   }
@@ -171,7 +175,7 @@
   function set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   var manual=get(OK), clicks=get(CK), reset=document.getElementById('ordReset');
   var grids=[].slice.call(document.querySelectorAll('.grid')), byHref={}, home={};
-  function secName(g){ var s=g.previousElementSibling; return s?s.textContent.trim():''; }
+  function secName(g){ var s=g.previousElementSibling; return s?(s.dataset.key||s.textContent.trim()):''; }
   function key(a){ return a.getAttribute('href'); }
   grids.forEach(function(g){ [].forEach.call(g.querySelectorAll('a.card'), function(a,i){ byHref[key(a)]=a; home[key(a)]=i; }); });
   // 1) 手で並べたカテゴリを復元（カテゴリをまたいだ移動も含む）
