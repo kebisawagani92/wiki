@@ -58,6 +58,10 @@
   .card .path{ font-size:.82rem; color:var(--accent2); margin-top:2px;
     font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; }
   @media (prefers-color-scheme: dark){ .card .path{ color:var(--accent); } }
+  #ordReset{ display:block; margin:28px auto 0; padding:8px 14px; font:inherit; font-size:.8rem; color:var(--sub); background:transparent; border:1px solid var(--sub); border-radius:999px; cursor:pointer; opacity:.8; }
+  #ordReset[hidden]{ display:none; }
+  .sortable-ghost{ opacity:.35; } .sortable-chosen{ cursor:grabbing; }
+  a.card{ -webkit-user-drag:none; -webkit-touch-callout:none; user-select:none; }
 </style>
 </head>
 <body>
@@ -137,6 +141,35 @@
       <span class="txt"><div class="name">プライベートタスク</div><div class="path">trello.com</div></span>
     </a>
   </div>
+<button id="ordReset" type="button" hidden>並び順をリセット（よく使う順に戻す）</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+(function(){
+  // 並び順：手で動かしたカテゴリはその順を保存。動かしていないカテゴリは、よく使う順（クリック回数の多い順）に左から並べる。
+  var OK='portalOrder_v1', CK='portalClicks_v1';
+  function get(k){ try{ return JSON.parse(localStorage.getItem(k)||'{}')||{}; }catch(e){ return {}; } }
+  function set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  var manual=get(OK), clicks=get(CK), reset=document.getElementById('ordReset');
+  var grids=[].slice.call(document.querySelectorAll('.grid')), byHref={}, home={};
+  function secName(g){ var s=g.previousElementSibling; return s?s.textContent.trim():''; }
+  function key(a){ return a.getAttribute('href'); }
+  grids.forEach(function(g){ [].forEach.call(g.querySelectorAll('a.card'), function(a,i){ byHref[key(a)]=a; home[key(a)]=i; }); });
+  // 1) 手で並べたカテゴリを復元（カテゴリをまたいだ移動も含む）
+  grids.forEach(function(g){ var o=manual[secName(g)]; if(!o) return; o.forEach(function(h){ if(byHref[h]) g.appendChild(byHref[h]); }); });
+  // 2) それ以外のカテゴリは、よく使う順
+  grids.forEach(function(g){ var n=secName(g), o=manual[n]||[];
+    var rest=[].filter.call(g.querySelectorAll('a.card'), function(a){ return o.indexOf(key(a))<0; });
+    rest.sort(function(a,b){ return (clicks[key(b)]||0)-(clicks[key(a)]||0) || home[key(a)]-home[key(b)]; });
+    rest.forEach(function(a){ g.appendChild(a); });
+  });
+  reset.hidden = Object.keys(manual).length===0;
+  document.addEventListener('click', function(e){ var a=e.target.closest && e.target.closest('a.card'); if(!a) return; var k=key(a); clicks[k]=(clicks[k]||0)+1; set(CK,clicks); });
+  function saveSec(g){ manual[secName(g)]=[].map.call(g.querySelectorAll('a.card'), key); }
+  if(window.Sortable){ grids.forEach(function(g){ new Sortable(g, { group:'cards', animation:150, delay:200, delayOnTouchOnly:true, draggable:'a.card', forceFallback:true, fallbackTolerance:6,
+    onEnd:function(ev){ saveSec(ev.from); saveSec(ev.to); set(OK,manual); reset.hidden=false; } }); }); }
+  reset.addEventListener('click', function(){ try{ localStorage.removeItem(OK); }catch(e){} location.reload(); });
+})();
+</script>
 </div>
 </body>
 </html>
