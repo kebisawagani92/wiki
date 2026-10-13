@@ -62,11 +62,16 @@
   #ordReset[hidden]{ display:none; }
   .sortable-ghost{ opacity:.35; } .sortable-chosen{ cursor:grabbing; }
   a.card{ -webkit-user-drag:none; -webkit-touch-callout:none; user-select:none; }
+  .tabs{ display:flex; gap:8px; margin:0 0 6px; }
+  .tabs button{ flex:1; max-width:220px; padding:10px 8px; font:inherit; font-size:1rem; font-weight:700; color:var(--sub); background:transparent; border:1px solid var(--sub); border-radius:999px; cursor:pointer; }
+  .tabs button.on{ color:#fff; background:var(--accent2,#2f9d7f); border-color:transparent; }
+  .tabhide{ display:none !important; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>ダッシュボード ポータル</h1>
+  <div class="tabs" id="tabs"><button type="button" data-tab="work">ワーク</button><button type="button" data-tab="private">プライベート</button></div>
 
   <div class="sec">投資・マーケット</div>
   <div class="grid">
@@ -141,6 +146,21 @@
       <span class="txt"><div class="name">プライベートタスク</div><div class="path">trello.com</div></span>
     </a>
   </div>
+<script>
+(function(){
+  // タブ：カテゴリ単位でワーク／プライベートに振り分ける
+  var TAB={'投資・マーケット':'private','外部サービス':'private','ツール':'work','ロジック':'work','会社情報':'work'}, TK='portalTab_v1';
+  var btns=[].slice.call(document.querySelectorAll('#tabs button')), secs=[].slice.call(document.querySelectorAll('.sec'));
+  function show(tab){
+    secs.forEach(function(s){ var hide=(TAB[s.textContent.trim()]||'work')!==tab; s.classList.toggle('tabhide',hide); var g=s.nextElementSibling; if(g) g.classList.toggle('tabhide',hide); });
+    btns.forEach(function(b){ b.classList.toggle('on', b.dataset.tab===tab); });
+    try{ localStorage.setItem(TK,tab); }catch(e){}
+  }
+  btns.forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.tab); }); });
+  var cur='work'; try{ cur=localStorage.getItem(TK)||'work'; }catch(e){}
+  show(cur==='private'?'private':'work');
+})();
+</script>
 <button id="ordReset" type="button" hidden>並び順をリセット（よく使う順に戻す）</button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
