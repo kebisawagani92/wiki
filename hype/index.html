@@ -5,29 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ハイプ・サイクル</title>
 <style>
-  body{margin:0; color:#e9eef6; line-height:1.7; -webkit-font-smoothing:antialiased;
+  body{margin:0; color:#16202e; line-height:1.7; -webkit-font-smoothing:antialiased;
     background:
-      radial-gradient(1100px 620px at 12% -12%, rgba(79,163,255,.18), transparent 62%),
-      radial-gradient(900px 520px at 96% 112%, rgba(46,230,168,.14), transparent 60%),
-      #080b10;
+      radial-gradient(1100px 620px at 12% -12%, rgba(37,99,235,.13), transparent 62%),
+      radial-gradient(900px 520px at 96% 112%, rgba(5,150,105,.12), transparent 60%),
+      #f5f7fb;
     font-family:"Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",-apple-system,"Segoe UI",sans-serif;}
   .box{max-width:460px; margin:16vh auto 0; padding:26px 24px; border-radius:16px;
-    background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-    border:1px solid rgba(255,255,255,.10); box-shadow:0 18px 50px rgba(0,0,0,.5);
+    background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.82));
+    border:1px solid rgba(16,32,56,.10); box-shadow:0 14px 40px rgba(16,32,56,.14);
     -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);}
   h1{font-size:17px; font-weight:800; margin:0 0 10px; letter-spacing:.01em;
-    background:linear-gradient(92deg,#fff 10%,#9fd8ff 55%,#6cf0c8 100%);
+    background:linear-gradient(92deg,#16202e 10%,#2563EB 55%,#059669 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;}
-  p{font-size:13px; color:#8b97a7; margin:6px 0;}
-  input{width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(255,255,255,.14);
-    background:rgba(255,255,255,.04); color:#e9eef6; font-size:13px; box-sizing:border-box; outline:none;}
-  input:focus{border-color:rgba(79,163,255,.6); box-shadow:0 0 0 3px rgba(79,163,255,.14);}
+  p{font-size:13px; color:#6b7684; margin:6px 0;}
+  input{width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(16,32,56,.16);
+    background:#fff; color:#16202e; font-size:13px; box-sizing:border-box; outline:none;}
+  input:focus{border-color:rgba(37,99,235,.6); box-shadow:0 0 0 3px rgba(37,99,235,.14);}
   button{margin-top:14px; padding:10px 20px; border:none; border-radius:9px;
-    background:linear-gradient(92deg,#4FA3FF,#2EE6A8); color:#06231d; font-weight:800; font-size:13px;
-    cursor:pointer; box-shadow:0 6px 18px rgba(46,230,168,.22);}
+    background:linear-gradient(92deg,#2563EB,#059669); color:#fff; font-weight:800; font-size:13px;
+    cursor:pointer; box-shadow:0 6px 18px rgba(37,99,235,.24);}
   button:hover{filter:brightness(1.07);}
-  .err{color:#FF8FA3; font-size:12.5px; min-height:1em;}
-  .muted{font-size:11.5px; color:#6c7889;}
+  .err{color:#E11D48; font-size:12.5px; min-height:1em;}
+  .muted{font-size:11.5px; color:#8b96a5;}
 </style>
 </head>
 <body>
@@ -56,7 +56,7 @@
         return res.text();
       })
       .then(function(html){ document.open(); document.write(html); document.close();
-        try{var _pl=document.createElement('a');_pl.href='../portal/';_pl.textContent='≡ ポータル';_pl.setAttribute('style','position:fixed;left:12px;bottom:12px;z-index:2147483000;font:700 12px sans-serif;background:linear-gradient(92deg,rgba(79,163,255,.95),rgba(46,230,168,.95));color:#06231d;padding:7px 13px;border-radius:999px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.45)');document.body.appendChild(_pl);}catch(e){} })
+        try{var _pl=document.createElement('a');_pl.href='../portal/';_pl.textContent='≡ ポータル';_pl.setAttribute('style','position:fixed;left:12px;bottom:12px;z-index:2147483000;font:700 12px sans-serif;background:linear-gradient(92deg,#2563EB,#059669);color:#fff;padding:7px 13px;border-radius:999px;text-decoration:none;box-shadow:0 4px 14px rgba(16,32,56,.28)');document.body.appendChild(_pl);}catch(e){} })
       .catch(function(e){ showSetup('読み込み失敗: '+e.message); });
   }
   el('go').addEventListener('click',function(){
