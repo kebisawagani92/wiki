@@ -91,9 +91,6 @@
     <a class="card" href="../ryotei/" target="_blank" rel="noopener">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="3" y1="13" x2="21" y2="13"/><line x1="12" y1="11" x2="12" y2="15"/></svg></span>
       <span class="txt"><div class="name">旅程表</div><div class="path">/ryotei/</div></span>    </a>
-    <a class="card" href="../secdiag/" target="_blank" rel="noopener">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
-      <span class="txt"><div class="name">セキュリティ診断</div><div class="path">/secdiag/</div></span>    </a>
   </div>
 
   <div class="sec">ロジック</div>
@@ -124,21 +121,20 @@
       <span class="txt"><div class="name">マンダラート</div><div class="path">/mandala/</div></span>    </a>
   </div>
 
-  <div class="sec">会社情報</div>
+  <div class="sec" data-key="ツール（プライベート）">ツール</div>
   <div class="grid">
+    <a class="card" href="../zokusei/" target="_blank" rel="noopener">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="txt"><div class="name">属性DB</div><div class="path">/zokusei/</div></span>    </a>
+    <a class="card" href="../secdiag/" target="_blank" rel="noopener">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+      <span class="txt"><div class="name">セキュリティ診断</div><div class="path">/secdiag/</div></span>    </a>
     <a class="card" href="../cf/" target="_blank" rel="noopener">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="20" y2="21"/><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="6" width="4" height="13" rx="1"/><rect x="16" y="9" width="4" height="10" rx="1"/></svg></span>
       <span class="txt"><div class="name">キャッシュフロー予測</div><div class="path">/cf/</div></span>    </a>
     <a class="card" href="../divtool/" target="_blank" rel="noopener">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></span>
       <span class="txt"><div class="name">配当計算ツール</div><div class="path">/divtool/</div></span>    </a>
-  </div>
-
-  <div class="sec" data-key="ツール（プライベート）">ツール</div>
-  <div class="grid">
-    <a class="card" href="../zokusei/" target="_blank" rel="noopener">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-      <span class="txt"><div class="name">属性DB</div><div class="path">/zokusei/</div></span>    </a>
   </div>
 
   <div class="sec">外部サービス</div>
@@ -159,7 +155,7 @@
 <script>
 (function(){
   // タブ：カテゴリ単位でワーク／プライベートに振り分ける
-  var TAB={'投資・マーケット':'private','外部サービス':'private','ツール（プライベート）':'private','ツール':'work','ロジック':'work','会社情報':'work'}, TK='portalTab_v1';
+  var TAB={'投資・マーケット':'private','外部サービス':'private','ツール（プライベート）':'private','ツール':'work','ロジック':'work'}, TK='portalTab_v1';
   var btns=[].slice.call(document.querySelectorAll('#tabs button')), secs=[].slice.call(document.querySelectorAll('.sec'));
   function show(tab){
     secs.forEach(function(s){ var hide=(TAB[s.dataset.key||s.textContent.trim()]||'work')!==tab; s.classList.toggle('tabhide',hide); var g=s.nextElementSibling; if(g) g.classList.toggle('tabhide',hide); });
