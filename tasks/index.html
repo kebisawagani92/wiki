@@ -48,8 +48,7 @@
         if(!res.ok) throw new Error('HTTP '+res.status+(res.status===401?'（トークン無効）':res.status===404?'（権限不足 or ファイルなし）':''));
         return res.text();
       })
-      .then(function(html){ document.open(); document.write(html); document.close();
-        try{var _pl=document.createElement('a');_pl.href='../portal/';_pl.textContent='≡ ポータル';_pl.setAttribute('style','position:fixed;left:12px;bottom:12px;z-index:2147483000;font:700 12px sans-serif;background:linear-gradient(92deg,#2563EB,#059669);color:#fff;padding:7px 13px;border-radius:999px;text-decoration:none;box-shadow:0 4px 14px rgba(16,32,56,.28)');document.body.appendChild(_pl);}catch(e){} })
+      .then(function(html){ document.open(); document.write(html); document.close(); })
       .catch(function(e){ showSetup('読み込み失敗: '+e.message); });
   }
   load();
