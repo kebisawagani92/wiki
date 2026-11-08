@@ -66,11 +66,58 @@
   .tabs button{ flex:1; max-width:220px; padding:10px 8px; font:inherit; font-size:1rem; font-weight:700; color:var(--sub); background:transparent; border:1px solid var(--sub); border-radius:999px; cursor:pointer; }
   .tabs button.on{ color:#fff; background:var(--accent2,#2f9d7f); border-color:transparent; }
   .tabhide{ display:none !important; }
+
+  .airport-bus{ margin:0 0 28px; padding:22px; border:1px solid var(--line); border-radius:18px; background:var(--card); }
+  .airport-bus h2{ margin:0 0 8px; font-size:1.2rem; }
+  .airport-bus p{ margin:8px 0; }
+  .airport-bus a{ color:var(--accent2); text-underline-offset:3px; }
+  .airport-bus .bus-meta{ color:var(--sub); font-size:.85rem; }
+  .airport-bus summary{ padding:12px 0; font-weight:700; cursor:pointer; color:var(--accent2); }
+  .bus-table-wrap{ overflow-x:auto; }
+  .airport-bus table{ width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; text-align:center; }
+  .airport-bus caption{ text-align:left; padding:4px 0 10px; font-size:.85rem; color:var(--sub); }
+  .airport-bus th,.airport-bus td{ padding:9px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .airport-bus thead{ background:var(--card2); font-size:.8rem; }
+  @media(max-width:600px){ .airport-bus{ padding:16px 12px; } .airport-bus th,.airport-bus td{ padding:9px 4px; font-size:.8rem; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>ダッシュボード ポータル</h1>
+
+  <section id="shinagawa-airport-bus" class="airport-bus" aria-labelledby="airport-bus-title">
+    <h2 id="airport-bus-title">品川シーサイド発 → 羽田空港</h2>
+    <p class="bus-meta">空港連絡バス（リムジンバス）｜2番のりば｜平日・土休日共通</p>
+    <p>大人800円・小児400円。第2 → 第1 → 第3ターミナルの順に停車します。</p>
+    <details>
+      <summary>全15便の時刻表を表示</summary>
+      <div class="bus-table-wrap" role="region" aria-label="品川シーサイド発 羽田空港行き時刻表" tabindex="0">
+        <table>
+          <caption>毎日運行・日本時間（2026年7月1日改定）</caption>
+          <thead><tr><th scope="col">品川シーサイド発</th><th scope="col">第2着</th><th scope="col">第1着</th><th scope="col">第3着</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">05:49</th><td>06:07</td><td>06:12</td><td>06:19</td></tr>
+            <tr><th scope="row">06:09</th><td>06:27</td><td>06:32</td><td>06:39</td></tr>
+            <tr><th scope="row">06:39</th><td>06:57</td><td>07:02</td><td>07:09</td></tr>
+            <tr><th scope="row">07:11</th><td>07:27</td><td>07:32</td><td>07:39</td></tr>
+            <tr><th scope="row">08:11</th><td>08:27</td><td>08:32</td><td>08:39</td></tr>
+            <tr><th scope="row">09:11</th><td>09:27</td><td>09:32</td><td>09:39</td></tr>
+            <tr><th scope="row">10:11</th><td>10:27</td><td>10:32</td><td>10:39</td></tr>
+            <tr><th scope="row">11:55</th><td>12:17</td><td>12:22</td><td>12:29</td></tr>
+            <tr><th scope="row">13:50</th><td>14:12</td><td>14:17</td><td>14:24</td></tr>
+            <tr><th scope="row">15:20</th><td>15:42</td><td>15:47</td><td>15:54</td></tr>
+            <tr><th scope="row">16:20</th><td>16:42</td><td>16:47</td><td>16:54</td></tr>
+            <tr><th scope="row">17:20</th><td>17:42</td><td>17:47</td><td>17:54</td></tr>
+            <tr><th scope="row">18:50</th><td>19:12</td><td>19:17</td><td>19:24</td></tr>
+            <tr><th scope="row">20:44</th><td>21:02</td><td>21:07</td><td>21:14</td></tr>
+            <tr><th scope="row">21:24</th><td>21:42</td><td>21:47</td><td>21:54</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <p class="bus-meta">6:39発は東急バス、その他は京浜急行バス。到着時刻は目安です。道路状況による遅延や満席で乗車できない場合があるため、余裕を持ってご利用ください。</p>
+    <p class="bus-meta">確認日：2026年11月8日。<a href="https://www.tokyubus.co.jp/airport/de-osaki.html" target="_blank" rel="noopener">公式路線案内・のりば</a> ／ <a href="https://transfer.navitime.biz/tokyubus/pc/diagram/BusDiagram?course=0004603413&amp;orvCode=00241470&amp;stopNo=3" target="_blank" rel="noopener">公式時刻表（運行日を確認）</a></p>
+  </section>
   <div class="tabs" id="tabs"><button type="button" data-tab="work">ワーク</button><button type="button" data-tab="private">プライベート</button></div>
 
   <div class="sec">投資・マーケット</div>
