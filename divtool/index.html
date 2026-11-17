@@ -27,7 +27,7 @@
 <div class="box" id="loading"><h1>読み込み中…</h1></div>
 <script>
 (function(){
-  var SRC={owner:'kebisawagani92', repo:'wiki-data', branch:'main', main:'divtool/tool.html', data:'divtool/reit_data.js'};
+  var SRC={owner:'kebisawagani92', repo:'wiki-data', branch:'main', main:'divtool/tool.html', data:'divtool/reit_data.js', actual:'divtool/div_actual.js'};
   var el=function(id){return document.getElementById(id);};
   function token(){ return localStorage.getItem('cfGhToken') || localStorage.getItem('wikiGhToken') || ''; }
   function showSetup(msg){ el('loading').hidden=true; el('setup').hidden=false; el('err').textContent=msg||''; }
@@ -43,9 +43,16 @@
         if(!res.ok) throw new Error('HTTP '+res.status+(res.status===401?'（トークン無効）':res.status===404?'（権限不足 or ファイルなし）':''));
         return res.text();
       }),
-      gh(SRC.data,t).then(function(res){ return res.ok?res.text():null; }).catch(function(){ return null; })
+      gh(SRC.data,t).then(function(res){ return res.ok?res.text():null; }).catch(function(){ return null; }),
+      gh(SRC.actual,t).then(function(res){ return res.ok?res.text():null; }).catch(function(){ return null; })
     ]).then(function(r){
-      var html=r[0], reit=r[1];
+      var html=r[0], reit=r[1], actual=r[2];
+      if(actual){
+        html=html.replace(/<script src="div_actual\.js"[^>]*><\/script>/,
+          function(){ return '<script>
+'+actual.replace(/^﻿/,'')+'
+<\/script>'; });
+      }
       if(reit){
         /* ローカル参照の reit_data.js をインライン展開（Pages上では相対パスが404になるため） */
         html=html.replace(/<script src="reit_data\.js"[^>]*><\/script>/,
