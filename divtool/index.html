@@ -49,9 +49,7 @@
       var html=r[0], reit=r[1], actual=r[2];
       if(actual){
         html=html.replace(/<script src="div_actual\.js"[^>]*><\/script>/,
-          function(){ return '<script>
-'+actual.replace(/^﻿/,'')+'
-<\/script>'; });
+          function(){ return '<script>\n'+actual.replace(/^﻿/,'')+'\n<\/script>'; });
       }
       if(reit){
         /* ローカル参照の reit_data.js をインライン展開（Pages上では相対パスが404になるため） */
