@@ -40,6 +40,7 @@
     align-items:center;justify-content:center;font-size:15px;position:relative;
     border:1px solid transparent;color:var(--ink);}
   .cell.blank{visibility:hidden;}
+  .cell.other{opacity:.45;font-size:13px;}
   .cell.sun{color:#e05656;} .cell.sat{color:#4a86e0;}
   .cell.today{border-color:var(--today);}
   .cell.trip{background:var(--accent);color:#fff;cursor:pointer;font-weight:800;
@@ -157,6 +158,25 @@
     });
   }
 
+  function makeCell(d, todayStr, other){
+    var key=ymd(d), dow=d.getDay(), day=d.getDate();
+    var c=document.createElement('div');
+    c.className='cell'+(dow===0?' sun':dow===6?' sat':'')+(other?' other':'');
+    if(key===todayStr) c.className+=' today';
+    var num=document.createElement('div'); num.textContent=other&&day===1?(d.getMonth()+1)+'/1':day; c.appendChild(num);
+    var tr=tripByDate[key];
+    if(tr){
+      c.className+=' trip';
+      if(isPast(tr)) c.className+=' past';
+      var isStart=(key===tr.start), isEnd=(key===(tr.end||tr.start));
+      if(isStart&&isEnd){} else if(isStart){ c.className+=' rangestart'; }
+      else if(isEnd){ c.className+=' rangeend'; } else { c.className+=' rangemid'; }
+      var dot=document.createElement('div'); dot.className='dot'; c.appendChild(dot);
+      c.addEventListener('click',function(){ openTrip(tr); });
+    }
+    return c;
+  }
+
   function renderCalendar(){
     el('monthLabel').textContent=viewY+'年 '+(viewM+1)+'月';
     var g=el('grid'); g.innerHTML='';
@@ -170,24 +190,10 @@
     var days=new Date(viewY, viewM+1, 0).getDate();
     var todayStr=ymd(new Date());
     for(var b=0;b<start;b++){ var bl=document.createElement('div'); bl.className='cell blank'; g.appendChild(bl); }
-    for(var day=1; day<=days; day++){
-      var d=new Date(viewY, viewM, day), key=ymd(d), dow=d.getDay();
-      var c=document.createElement('div');
-      c.className='cell'+(dow===0?' sun':dow===6?' sat':'');
-      if(key===todayStr) c.className+=' today';
-      var num=document.createElement('div'); num.textContent=day; c.appendChild(num);
-      var tr=tripByDate[key];
-      if(tr){
-        c.className+=' trip';
-        if(isPast(tr)) c.className+=' past';
-        var isStart=(key===tr.start), isEnd=(key===(tr.end||tr.start));
-        if(isStart&&isEnd){} else if(isStart){ c.className+=' rangestart'; }
-        else if(isEnd){ c.className+=' rangeend'; } else { c.className+=' rangemid'; }
-        var dot=document.createElement('div'); dot.className='dot'; c.appendChild(dot);
-        (function(t){ c.addEventListener('click',function(){ openTrip(t); }); })(tr);
-      }
-      g.appendChild(c);
-    }
+    for(var day=1; day<=days; day++){ g.appendChild(makeCell(new Date(viewY, viewM, day), todayStr, false)); }
+    // 最終行の残りを翌月の日付で埋める
+    var tail=(7-(start+days)%7)%7;
+    for(var n=1; n<=tail; n++){ g.appendChild(makeCell(new Date(viewY, viewM+1, n), todayStr, true)); }
     renderList();
   }
 
